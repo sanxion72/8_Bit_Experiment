@@ -1,0 +1,13 @@
+﻿  olcExampleProgram.cpp
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+C:\Users\santoc\Source\repos\TestPixelEngine_4\TestPixelEngine\olcPGEX_AnimatedSprite.h(242,16): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
+          with
+          [
+              T=int32_t
+          ]
+C:\Users\santoc\Source\repos\TestPixelEngine_4\TestPixelEngine\olcPGEX_AnimatedSprite.h(245,19): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
+          with
+          [
+              T=int32_t
+          ]
+  TestPixelEngine.vcxproj -> C:\Users\santoc\Source\repos\TestPixelEngine_4\Debug\TestPixelEngine.exe
