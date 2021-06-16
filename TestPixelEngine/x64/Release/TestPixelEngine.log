@@ -1,8 +1,0 @@
-﻿  olcExampleProgram.cpp
-  C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
-C:\Users\santoc\Source\repos\TestPixelEngine\TestPixelEngine\olcPGEX_Gamepad.h(502,27): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  Generating code
-  Previous IPDB not found, fall back to full compilation.
-  All 1132 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
-  Finished generating code
-  TestPixelEngine.vcxproj -> C:\Users\santoc\source\repos\TestPixelEngine\x64\Release\TestPixelEngine.exe
