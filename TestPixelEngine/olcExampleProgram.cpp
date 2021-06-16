@@ -270,20 +270,20 @@ public:
 	void Visualizza_Palette()
 	{	
 		// visualizza la palette su schermo come carattere spazio inverse con il colore uguale foregroud e background
-		BYTE nRow = 8;
-		BYTE nColoumn = 0;
 
 		for (int nColor = 0; nColor <= 255; nColor++) {
-			//PrintOnVirtualScreen(nRow, nColoumn, Palette[nColor], 255, Palette[nColor], 255, "@");
-			VirtualScreenMap_40[nColor].chars.CharCode = 32; // il carattere ' ' spazio
-			VirtualScreenMap_40[nColor].chars.CharColor = Palette[nColor];
-			VirtualScreenMap_40[nColor].chars.BackgroundColor = Palette[nColor];
-
-			if (nColoumn == 15) {
-				nColoumn = 0;
-				nRow++;
+			if (colMode80) {
+				VirtualScreenMap_80[nColor].chars.CharCode = 32; // il carattere ' ' spazio
+				VirtualScreenMap_80[nColor].chars.CharColor = Palette[nColor];
+				VirtualScreenMap_80[nColor].chars.BackgroundColor = Palette[nColor];
 			}
-			else nColoumn++;
+			else
+			{
+				VirtualScreenMap_40[nColor].chars.CharCode = 32; // il carattere ' ' spazio
+				VirtualScreenMap_40[nColor].chars.CharColor = Palette[nColor];
+				VirtualScreenMap_40[nColor].chars.BackgroundColor = Palette[nColor];
+
+			}
 		}
 	}
 
@@ -300,8 +300,8 @@ public:
 				VirtualScreenMap_40[index].xCoord= 50 + offsetColonna;
 				VirtualScreenMap_40[index].yCoord = 20 + offsetRiga;
 				VirtualScreenMap_40[index].chars.CharCode = 32; // il carattere ' ' spazio
-				VirtualScreenMap_40[index].chars.CharColor = Palette[14];
-				VirtualScreenMap_40[index].chars.BackgroundColor = Palette[6];
+				VirtualScreenMap_40[index].chars.CharColor = colorScreen;
+				VirtualScreenMap_40[index].chars.BackgroundColor = colorBorder;
 
 				offsetColonna += 8;
 				index++;
@@ -316,11 +316,11 @@ public:
 			for (int colonna = 0; colonna <= 79; colonna++) {
 				VirtualScreenMap_80[index].row = riga;
 				VirtualScreenMap_80[index].col = colonna;
-				VirtualScreenMap_80[index].xCoord = 50 + offsetColonna;
+				VirtualScreenMap_80[index].xCoord = 100 + offsetColonna;
 				VirtualScreenMap_80[index].yCoord = 20 + offsetRiga;
 				VirtualScreenMap_80[index].chars.CharCode = 32; // il carattere ' ' spazio
-				VirtualScreenMap_80[index].chars.CharColor = Palette[14];
-				VirtualScreenMap_80[index].chars.BackgroundColor = Palette[6];
+				VirtualScreenMap_80[index].chars.CharColor = colorScreen;
+				VirtualScreenMap_80[index].chars.BackgroundColor = colorBorder;
 
 				offsetColonna += 8;
 				index++;
@@ -332,19 +332,38 @@ public:
 	}
 
 	void SyncVirtualScreenMap() {
-		for (int t = 0; t <= 255; t++) {
-			VirtualScreenMap_40[t].chars.CharCode = 32;
-			VirtualScreenMap_40[t].chars.CharColor = Palette[t];
-			SetCharOnScreen(VirtualScreenMap_40[t],true);
+
+		if (colMode80) {
+			for (int t = 0; t <= 2399; t++) {
+				//VirtualScreenMap_40[t].chars.CharCode = 32;
+				//VirtualScreenMap_40[t].chars.CharColor = Palette[t];
+				SetCharOnScreen(VirtualScreenMap_80[t]);
+			}
 		}
-		
+		else
+		{
+			for (int t = 0; t <= 1199; t++) {
+				//VirtualScreenMap_40[t].chars.CharCode = 32;
+				//VirtualScreenMap_40[t].chars.CharColor = Palette[t];
+				SetCharOnScreen(VirtualScreenMap_40[t]);
+			}
+		}
+		/*
+		for (int t = 0; t <= 2399; t++) {
+			VirtualScreenMap_80[t].chars.CharCode = 32;
+			VirtualScreenMap_80[t].chars.CharColor = Palette[t];
+			SetCharOnScreen(VirtualScreenMap_80[t], true);
+
+		}
+		*/
+		/* Stessi colori ma con alpha 
 		for (int t = 256; t <= 511; t++) {
 			VirtualScreenMap_40[t].chars.CharCode = 32;
 			VirtualScreenMap_40[t].chars.CharColor = Palette[t-256];
 			VirtualScreenMap_40[t].chars.Alpha_CharColor = 64;
 			SetCharOnScreen(VirtualScreenMap_40[t],true);
 		}
-
+		*/
 	}
 
 	void SetCharOnScreen(CharCell CharAttrib, BOOL inverse = false) {
@@ -426,7 +445,7 @@ public:
 		colorScreen = Palette[14];
 		colorBorder = Palette[6];
 
-		LoadCharacterSet("C:\\Fonts\\petscii64.bin",false);
+		LoadCharacterSet(".\\charset.bin",false);
 		Init_VirtualScreenMap();
 	}
 
@@ -462,11 +481,7 @@ public:
 		//PrintOnVirtualScreen(4, 0, Palette[52], 255, Palette[6], 255, "READY.");
 		
 		Visualizza_Palette();
-
-		//DrawSprite(50, 100, fontSprite);
 		
-		//SyncVirtualScreenMap();
-
 		EnableLayer(nLayerBackground, true);
 		SetDrawTarget(nullptr);
 
@@ -500,11 +515,12 @@ public:
 
 		SetDrawTarget(nLayerBackground);
 		
-		DrawPartialSprite(cursorPosition.x, cursorPosition.y, fontSprite, charMap[160].xCoord, charMap[160].yCoord, 8, 8);
 		SyncVirtualScreenMap();
 		
 		EnableLayer(nLayerBackground,true);
 		
+		DrawSprite((colMode80 ? 100 : 50), 100, fontSprite);
+
 		SetDrawTarget(nullptr);
 		
 		SetDrawTarget(nLayerBorder);
