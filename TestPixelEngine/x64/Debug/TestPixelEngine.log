@@ -1,14 +1,24 @@
 ﻿  olcExampleProgram.cpp
-  C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
-C:\Users\santoc\Source\repos\TestPixelEngine_4\TestPixelEngine\olcPGEX_Gamepad.h(502,27): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\santoc\Source\repos\TestPixelEngine_4\TestPixelEngine\olcPGEX_AnimatedSprite.h(242,16): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+C:\Users\eleonora\Documents\MyGit\8_Bit_Experiment\TestPixelEngine\olcPGEX_Gamepad.h(502,27): warning C4267: 'argomento': conversione da 'size_t' a 'int'. Possibile perdita di dati.
+C:\Users\eleonora\Documents\MyGit\8_Bit_Experiment\TestPixelEngine\olcPGEX_AnimatedSprite.h(242,16): warning C4244: 'argomento': conversione da 'T' a 'float'. Possibile perdita di dati.
           with
           [
               T=int32_t
           ]
-C:\Users\santoc\Source\repos\TestPixelEngine_4\TestPixelEngine\olcPGEX_AnimatedSprite.h(245,19): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
+C:\Users\eleonora\Documents\MyGit\8_Bit_Experiment\TestPixelEngine\olcPGEX_AnimatedSprite.h(245,19): warning C4244: 'argomento': conversione da 'T' a 'float'. Possibile perdita di dati.
           with
           [
               T=int32_t
           ]
-  TestPixelEngine.vcxproj -> C:\Users\santoc\Source\repos\TestPixelEngine_4\x64\Debug\TestPixelEngine.exe
+C:\Users\eleonora\Documents\MyGit\8_Bit_Experiment\TestPixelEngine\olcExampleProgram.cpp(503,53): warning C4244: 'argomento': conversione da 'T' a 'int32_t'. Possibile perdita di dati.
+          with
+          [
+              T=float
+          ]
+C:\Users\eleonora\Documents\MyGit\8_Bit_Experiment\TestPixelEngine\olcExampleProgram.cpp(503,35): warning C4244: 'argomento': conversione da 'T' a 'int32_t'. Possibile perdita di dati.
+          with
+          [
+              T=float
+          ]
+  TestPixelEngine.vcxproj -> C:\Users\eleonora\Documents\MyGit\8_Bit_Experiment\x64\Debug\TestPixelEngine.exe

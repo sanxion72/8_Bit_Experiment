@@ -275,6 +275,10 @@ public:
 
 		for (int nColor = 0; nColor <= 255; nColor++) {
 			//PrintOnVirtualScreen(nRow, nColoumn, Palette[nColor], 255, Palette[nColor], 255, "@");
+			VirtualScreenMap_40[nColor].chars.CharCode = 32; // il carattere ' ' spazio
+			VirtualScreenMap_40[nColor].chars.CharColor = Palette[nColor];
+			VirtualScreenMap_40[nColor].chars.BackgroundColor = Palette[nColor];
+
 			if (nColoumn == 15) {
 				nColoumn = 0;
 				nRow++;
@@ -340,7 +344,6 @@ public:
 			VirtualScreenMap_40[t].chars.Alpha_CharColor = 64;
 			SetCharOnScreen(VirtualScreenMap_40[t],true);
 		}
-		
 
 	}
 
@@ -458,32 +461,20 @@ public:
 		//PrintOnVirtualScreen(2, 0, Palette[227], 255, Palette[6], 255, " 16M RAM SYSTEM 1024K BASIC BYTES FREE ");
 		//PrintOnVirtualScreen(4, 0, Palette[52], 255, Palette[6], 255, "READY.");
 		
-		//Visualizza_Palette();
+		Visualizza_Palette();
 
 		//DrawSprite(50, 100, fontSprite);
 		
-		SyncVirtualScreenMap();
+		//SyncVirtualScreenMap();
 
 		EnableLayer(nLayerBackground, true);
 		SetDrawTarget(nullptr);
 
-		//SetPixelMode(olc::Pixel::NORMAL);
+		SetPixelMode(olc::Pixel::NORMAL);
 
 		return true;
 	}
 
-	void ScrollScreen() {
-		
-		olc::Sprite* psprBackGround;
-		std::vector<olc::LayerDesc> vLayers;
-		
-		olc::Pixel riga[320];
-
-		vLayers = GetLayers();
-
-		psprBackGround = vLayers[nLayerBackground].pDrawTarget; 
-
-	}
 
 	bool OnUserUpdate(float fElapsedTime) override
 	{
@@ -491,9 +482,9 @@ public:
 		//Clear(olc::BLANK);
 		
 		// called once per frame
-		/*
-		SetDrawTarget(nLayerBackground);
 		
+		//SetDrawTarget(nLayerBackground);
+		/*
 		for (int y = 0; y < ScreenHeight(); y++)
 		{
 			BYTE R=rand() % 255;
@@ -502,52 +493,24 @@ public:
 			for (int x = 0; x< ScreenWidth(); x++)
 				Draw(x, y, olc::Pixel(R, G, B));
 		}
-		SetDrawTarget(nullptr);
 		*/
-
+		//SetDrawTarget(nullptr);
+		
 		Clear(olc::BLANK);
 
-		//SetDrawTarget(nLayerBackground);
-		/*
+		SetDrawTarget(nLayerBackground);
+		
 		DrawPartialSprite(cursorPosition.x, cursorPosition.y, fontSprite, charMap[160].xCoord, charMap[160].yCoord, 8, 8);
+		SyncVirtualScreenMap();
+		
+		EnableLayer(nLayerBackground,true);
+		
+		SetDrawTarget(nullptr);
+		
+		SetDrawTarget(nLayerBorder);
 
-		if (GetKey(olc::Key::RIGHT).bReleased) {
-			DrawPartialSprite(cursorPosition.x, cursorPosition.y, fontSprite, charMap[32].xCoord, charMap[32].yCoord, 8, 8);
-			cursorCol += 1;
-		}
-		
-		if (GetKey(olc::Key::LEFT).bReleased) {
-			DrawPartialSprite(cursorPosition.x, cursorPosition.y, fontSprite, charMap[32].xCoord, charMap[32].yCoord, 8, 8);
-			cursorCol -= 1;
-		}
-		
-		if (GetKey(olc::Key::UP).bReleased) {
-			DrawPartialSprite(cursorPosition.x, cursorPosition.y, fontSprite, charMap[32].xCoord, charMap[32].yCoord, 8, 8);
-			if (cursorRow == 0) {
-				cursorRow = 0;
-			}else cursorRow -= 1;
-		}
-		
-		if (GetKey(olc::Key::DOWN).bReleased) {
-			DrawPartialSprite(cursorPosition.x, cursorPosition.y, fontSprite, charMap[32].xCoord, charMap[32].yCoord, 8, 8);
-			if (cursorRow == 29) {
-				cursorRow = 29;
-			} else cursorRow += 1;
-		}
-		
-		cursorPosition = { (colMode80 ? (float)VirtualScreen80[cursorRow][cursorCol].xCoord : (float)VirtualScreen40[cursorRow][cursorCol].xCoord), (colMode80 ? (float)VirtualScreen80[cursorRow][cursorCol].yCoord : (float)VirtualScreen40[cursorRow][cursorCol].yCoord) };
-		*/
-		//EnableLayer(nLayerBackground,true);
-		
-		//SetDrawTarget(nullptr);
-		
-		//SetDrawTarget(nLayerBorder);
-
-		DrawString(0, 260, "cursorRow :" + std::to_string(cursorRow));
-		DrawString(0, 270, "cursorCol :" + std::to_string(cursorCol));
-
-		//EnableLayer(nLayerBorder, true);
-		//SetDrawTarget(nullptr);
+		EnableLayer(nLayerBorder, true);
+		SetDrawTarget(nullptr);
 
 		return true;
 	}
