@@ -1,11 +1,10 @@
 #define OLC_PGE_APPLICATION
-#define OLC_PGE_GAMEPAD
+//#define OLC_PGE_GAMEPAD
 #define OLC_PGEX_GRAPHICS2D
 #define OLC_PGEX_ANIMSPR
 
 
 #include "olcPixelGameEngine.h"
-#include "olcPGEX_Gamepad.h"
 #include "olcPGEX_Graphics2D.h"
 #include "olcPGEX_AnimatedSprite.h"
 
@@ -19,8 +18,13 @@ class Example : public olc::PixelGameEngine {
 
 private:
 
-	BYTE cursorRow = 6;
-	BYTE cursorCol = 0;
+	BOOL colMode80;					// true: 80 coloumn mode; false: 40 coloumn mode;
+
+	int cursorRow = 0;
+	int cursorCol = 0;
+
+	int screenMemIndex = 0;
+	int newScreenMemIndex = 0;
 
 public:
 	olc::vf2d cursorPosition;
@@ -29,6 +33,13 @@ public:
 
 	int nLayerBackground = 0;
 	int nLayerBorder = 0;
+
+	// contatore del tempo trascorso per il flash del cursore
+	float fTimeEl = 0.0f;
+
+	// contatore del tempo trascorso la scrittura del carattere su schermo
+	float fTimeChar = 0.0f;
+
 
 	struct Color {
 		BYTE R;	// RED
@@ -43,6 +54,7 @@ public:
 		int		CharCode = 0;					// il numero del carattere all'interno della posizione nel chars fontsheet
 		Color	CharColor;						// il colore del carattere 
 		Color	BackgroundColor;				// il colore dello sfondo del carattere
+		BOOL	Inverse = false;				// se il carattere è inverso (in negativo)
 		BYTE	Alpha_BackgroundColor = 255;	// canale alfa dello sfondo (255 pieno)
 		BYTE	Alpha_CharColor = 255;			// canale alfa del carattere (255 pieno)
 	};
@@ -55,15 +67,15 @@ public:
 		CharAttrib chars;
 	};
 
-	CharCell VirtualScreenMap_40[1200];		//array che simula una mappa in-memory dello schermo con 1200 locazioni (40 colonne X 30 righe con carattere 8x8)
-	CharCell VirtualScreenMap_80[2400];		//array che simula una mappa in-memory dello schermo con 2400 locazioni (80 colonne X 30 righe con carattere 8x8)
-
-	BOOL colMode80 = false;							// true: 80 coloumn mode; false: 40 coloumn mode;
+	//array di 2400 elementi che mappa in-memory lo schermo (se modo 40 colonne valgono i primi 1200 elementi altrimenti 2400 elementi;  Per 30 righe con carattere 8x8)
+	CharCell VirtualScreenMap[2400];
 
 	Color colorScreen; Color colorBorder;	// colori iniziali bordo e sfondo
 
 	struct charCoord { int xCoord; int yCoord; };
-	struct charCoord charMap[512];		// array contenente tutti i caratteri stampabili
+	struct charCoord charMap[512];			// array contenente tutti i caratteri stampabili
+	
+	std::string strAppo = "";
 
 	template <typename T> std::string tostr(const T& t)
 	{
@@ -126,7 +138,7 @@ public:
 
 	}
 
-	void InitPalette() { // Inizializza la palette
+	void InitPalette() { // Inizializza la palette di 256 colori
 
 		std::string RGB[256];
 
@@ -269,38 +281,63 @@ public:
 	void Visualizza_Palette()
 	{
 		// visualizza la palette su schermo come carattere spazio inverse con il colore uguale foregroud e background
-
 		for (int nColor = 0; nColor <= 255; nColor++) {
-			if (colMode80) {
-				VirtualScreenMap_80[nColor].chars.CharCode = 32; // il carattere ' ' spazio
-				VirtualScreenMap_80[nColor].chars.CharColor = Palette[nColor];
-				VirtualScreenMap_80[nColor].chars.BackgroundColor = Palette[nColor];
-			}
-			else
-			{
-				VirtualScreenMap_40[nColor].chars.CharCode = 32; // il carattere ' ' spazio
-				VirtualScreenMap_40[nColor].chars.CharColor = Palette[nColor];
-				VirtualScreenMap_40[nColor].chars.BackgroundColor = Palette[nColor];
-
-			}
+			VirtualScreenMap[nColor].chars.CharCode = 32; // il carattere ' ' spazio
+			VirtualScreenMap[nColor].chars.CharColor = Palette[nColor];
+			VirtualScreenMap[nColor].chars.BackgroundColor = Palette[nColor];
 		}
 	}
 
-	void Init_VirtualScreenMap() {
-		int offsetColonna = 0; int offsetRiga = 0;
-		int index = 0;
+	void VisualizzaCaratteri()
+	{
+		for (int t = 0; t <= 93; t++) {
+
+			VirtualScreenMap[t].chars.CharCode = 32 + t;
+			VirtualScreenMap[t].chars.CharColor = Palette[32+t];
+			VirtualScreenMap[t].chars.BackgroundColor = colorBorder;
+
+		}
+	}
+
+	// *** posiziona il cursore nello schermo e gestisce l'effetto lampeggìo
+	void Setta_Cursore() 
+	{
+		
+		if (newScreenMemIndex != screenMemIndex) {
+			VirtualScreenMap[screenMemIndex].chars.Inverse = false; // il carattere ' ' spazio
+		}
+
+		VirtualScreenMap[newScreenMemIndex].chars.Inverse = true; // il carattere ' ' spazio
+		cursorRow = VirtualScreenMap[newScreenMemIndex].row;
+		cursorCol = VirtualScreenMap[newScreenMemIndex].col;
+		
+		screenMemIndex = newScreenMemIndex;
+
+		/*
+		if (fTimeEl <= 0.5f)
+		{
+			VirtualScreenMap[screenMemIndex].chars.Inverse = false; // il carattere ' ' spazio
+		}
+		*/
+
+	}
+
+	// inizializza la virtualscreen map con il carattere ' ' spazio
+	void Init_VirtualScreenMap() 
+	{
+		int offsetColonna = 0; int offsetRiga = 0; int index = 0;
 
 		for (int riga = 0; riga <= 29; riga++)
 		{
-			for (int colonna = 0; colonna <= 39; colonna++)
+			for (int colonna = 0; colonna <= (colMode80 ? 79 : 39); colonna++)
 			{
-				VirtualScreenMap_40[index].row = riga;
-				VirtualScreenMap_40[index].col = colonna;
-				VirtualScreenMap_40[index].xCoord = 50 + offsetColonna;
-				VirtualScreenMap_40[index].yCoord = 20 + offsetRiga;
-				VirtualScreenMap_40[index].chars.CharCode = 32; // il carattere ' ' spazio
-				VirtualScreenMap_40[index].chars.CharColor = colorScreen;
-				VirtualScreenMap_40[index].chars.BackgroundColor = colorBorder;
+				VirtualScreenMap[index].row = riga;
+				VirtualScreenMap[index].col = colonna;
+				VirtualScreenMap[index].xCoord = (colMode80 ? 100 : 50) + offsetColonna;
+				VirtualScreenMap[index].yCoord = 20 + offsetRiga;
+				VirtualScreenMap[index].chars.CharCode = 32; // il carattere ' ' spazio
+				VirtualScreenMap[index].chars.CharColor = colorScreen;
+				VirtualScreenMap[index].chars.BackgroundColor = colorBorder;
 
 				offsetColonna += 8;
 				index++;
@@ -308,64 +345,25 @@ public:
 			offsetColonna = 0;
 			offsetRiga += 8;
 		}
-
-		offsetColonna = 0; offsetRiga = 0; index = 0;
-
-		for (int riga = 0; riga <= 29; riga++) {
-			for (int colonna = 0; colonna <= 79; colonna++) {
-				VirtualScreenMap_80[index].row = riga;
-				VirtualScreenMap_80[index].col = colonna;
-				VirtualScreenMap_80[index].xCoord = 100 + offsetColonna;
-				VirtualScreenMap_80[index].yCoord = 20 + offsetRiga;
-				VirtualScreenMap_80[index].chars.CharCode = 32; // il carattere ' ' spazio
-				VirtualScreenMap_80[index].chars.CharColor = colorScreen;
-				VirtualScreenMap_80[index].chars.BackgroundColor = colorBorder;
-
-				offsetColonna += 8;
-				index++;
-			}
-			offsetColonna = 0;
-			offsetRiga += 8;
-		}
-
 	}
 
 	void SyncVirtualScreenMap() {
 
-		if (colMode80) {
-			for (int t = 0; t <= 2399; t++) {
-				//VirtualScreenMap_40[t].chars.CharCode = 32;
-				//VirtualScreenMap_40[t].chars.CharColor = Palette[t];
-				SetCharOnScreen(VirtualScreenMap_80[t]);
-			}
+		for (int t = 0; t <= (colMode80 ? 2399 : 1199); t++) {
+			SetCharOnScreen(VirtualScreenMap[t]);
 		}
-		else
-		{
-			for (int t = 0; t <= 1199; t++) {
-				//VirtualScreenMap_40[t].chars.CharCode = 32;
-				//VirtualScreenMap_40[t].chars.CharColor = Palette[t];
-				SetCharOnScreen(VirtualScreenMap_40[t]);
-			}
-		}
-		/*
-		for (int t = 0; t <= 2399; t++) {
-			VirtualScreenMap_80[t].chars.CharCode = 32;
-			VirtualScreenMap_80[t].chars.CharColor = Palette[t];
-			SetCharOnScreen(VirtualScreenMap_80[t], true);
 
-		}
-		*/
 		/* Stessi colori ma con alpha
 		for (int t = 256; t <= 511; t++) {
-			VirtualScreenMap_40[t].chars.CharCode = 32;
-			VirtualScreenMap_40[t].chars.CharColor = Palette[t-256];
-			VirtualScreenMap_40[t].chars.Alpha_CharColor = 64;
-			SetCharOnScreen(VirtualScreenMap_40[t],true);
+			VirtualScreenMap[t].chars.CharCode = 32;
+			VirtualScreenMap[t].chars.CharColor = Palette[t-256];
+			VirtualScreenMap[t].chars.Alpha_CharColor = 64;
+			SetCharOnScreen(VirtualScreenMap[t],true);
 		}
 		*/
 	}
 
-	void SetCharOnScreen(CharCell CharAttrib, BOOL inverse = false) {
+	void SetCharOnScreen(CharCell CharAttrib) {
 
 		int32_t x;
 		int32_t y;
@@ -374,10 +372,14 @@ public:
 		int ox = 0;
 		int oy = 0;
 
+		BOOL inverse;
+
 		BYTE colIndex = 0;
 
 		x = CharAttrib.xCoord;
 		y = CharAttrib.yCoord;
+
+		inverse = CharAttrib.chars.Inverse;
 
 		olc::Pixel foregroundColor;
 		olc::Pixel backgroundColor;
@@ -441,14 +443,17 @@ public:
 	void Init() {
 		InitPalette();
 
-		colorScreen = Palette[14];
-		colorBorder = Palette[6];
+		colorScreen = Palette[14]; colorBorder = Palette[6];
 
 		LoadCharacterSet(".\\charset.bin", false);
+
 		Init_VirtualScreenMap();
 	}
 
-	void ScreenMode() {
+	void ScreenMode(bool mode80 = false) {
+		
+		colMode80 = mode80;
+
 		if (Construct((colMode80 ? 840 : 420), 280, (colMode80 ? 1 : 2), 2))
 			Start();
 	}
@@ -474,12 +479,17 @@ public:
 		nLayerBackground = CreateLayer();
 		SetDrawTarget(nLayerBackground);
 		FillRect((colMode80 ? 100 : 50), 20, (colMode80 ? 640 : 320), 240, olc::Pixel(colorBorder.R, colorBorder.G, colorBorder.B));
-
+		
+		// come promemoria
 		//PrintOnVirtualScreen(1, 0, Palette[14], 255, Palette[6], 255, "   **** COMMODORE 64 BASIC V10.0 ****   ");
 		//PrintOnVirtualScreen(2, 0, Palette[227], 255, Palette[6], 255, " 16M RAM SYSTEM 1024K BASIC BYTES FREE ");
 		//PrintOnVirtualScreen(4, 0, Palette[52], 255, Palette[6], 255, "READY.");
 
-		Visualizza_Palette();
+		//Visualizza_Palette();
+
+		VisualizzaCaratteri();
+
+		Setta_Cursore();
 
 		EnableLayer(nLayerBackground, true);
 		SetDrawTarget(nullptr);
@@ -492,7 +502,6 @@ public:
 
 	bool OnUserUpdate(float fElapsedTime) override
 	{
-
 		//Clear(olc::BLANK);
 
 		// called once per frame
@@ -510,22 +519,77 @@ public:
 		*/
 		//SetDrawTarget(nullptr);
 
-		Clear(olc::BLANK);
+		fTimeEl += fElapsedTime;
+		fTimeChar += fElapsedTime;
 
+		Clear(olc::BLANK);
+		
+		strAppo = "";
+		
 		SetDrawTarget(nLayerBackground);
 
 		SyncVirtualScreenMap();
 
 		EnableLayer(nLayerBackground, true);
 
-		DrawSprite((colMode80 ? 100 : 50), 100, fontSprite);
-
+		//DrawSprite((colMode80 ? 100 : 50), 100, fontSprite);
+		
 		SetDrawTarget(nullptr);
 
+		if (GetKey(olc::Key::LEFT).bHeld) {
+			strAppo = "LEFT";
+			// sposta il cursore a sinistra
+			if (fTimeChar >= 0.08f) {
+				if (screenMemIndex > 0) newScreenMemIndex -= 1;
+				fTimeChar = 0;
+			}
+		}
+		if (GetKey(olc::Key::RIGHT).bHeld) {
+			strAppo = "RIGHT";
+			// sposta il cursore a destra
+			if (fTimeChar >= 0.08f) {
+				if (screenMemIndex < (colMode80 ? 2399 : 1199)) newScreenMemIndex += 1;
+				fTimeChar = 0;
+			}
+		}
+
+		if (GetKey(olc::Key::UP).bHeld) {
+			strAppo = "UP";
+			if (fTimeChar >= 0.08f) {
+				if (screenMemIndex > (colMode80 ? 79 : 39)) newScreenMemIndex -= (colMode80 ? 80 : 40);
+				fTimeChar = 0;
+			}
+		}
+
+		if (GetKey(olc::Key::DOWN).bHeld) {
+			strAppo = "DOWN";
+			if (fTimeChar >= 0.08f) {
+				if (screenMemIndex < (colMode80 ? 2319 : 1159)) newScreenMemIndex += (colMode80 ? 80 : 40);
+				fTimeChar = 0;
+			}
+		}
+				
+		Setta_Cursore();
+
+		if (strAppo == "") {
+			if (fTimeEl <= 0.5f)
+			{
+				VirtualScreenMap[screenMemIndex].chars.Inverse = false; // il carattere ' ' spazio
+			}
+
+		}
+
+		DrawString((colMode80 ? 100 : 50), 260, "Tasto : " + strAppo);
+		DrawString((colMode80 ? 340 : 170), 260, "Tempo : " + tostr(fTimeEl));
+		DrawString((colMode80 ? 100 : 50), 268, "Riga : " + tostr(cursorRow) + "     Colonna : "+ tostr(cursorCol));
+		
 		SetDrawTarget(nLayerBorder);
-
+	
 		EnableLayer(nLayerBorder, true);
+		
 		SetDrawTarget(nullptr);
+
+		if (fTimeEl >= 1.0f) fTimeEl = 0.0f;
 
 		return true;
 	}
@@ -536,9 +600,9 @@ int main() {
 
 	Example demo;
 
-	//demo.colMode80 = true; 
-
-	demo.ScreenMode();
+	// ScreenMode(true); 80 colonne
+	// ScreenMode(); oppure ScreenMode(false); 40 colonne
+	demo.ScreenMode(true);
 
 	return 0;
 }
