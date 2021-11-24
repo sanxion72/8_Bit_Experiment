@@ -23,12 +23,12 @@ private:
 	int cursorRow = 0;
 	int cursorCol = 0;
 
-	int screenMemIndex = 0;
-	int newScreenMemIndex = 0;
+	int screenMemIndex;
+	int newScreenMemIndex;
 
 public:
-	olc::vf2d cursorPosition;
-
+	//olc::vf2d cursorPosition;
+	
 	olc::Sprite* fontSprite = nullptr;
 
 	int nLayerBackground = 0;
@@ -37,8 +37,12 @@ public:
 	// contatore del tempo trascorso per il flash del cursore
 	float fTimeEl = 0.0f;
 
-	// contatore del tempo trascorso la scrittura del carattere su schermo
+	// contatore del tempo trascorso per la scrittura del carattere su schermo
 	float fTimeChar = 0.0f;
+
+
+	// contatore del tempo trascorso l'effetto colore sul testo
+	float fTimeFXChar = 0.0f;
 
 
 	struct Color {
@@ -275,7 +279,24 @@ public:
 			Palette[pColor].A = value;
 
 		}
+	}
 
+	void PrintOnScreen(int32_t x, int32_t y, const std::string& sText, Color color, Color background, BOOL inverse=false, BYTE alpha_color=255, BYTE alpha_background=255) 
+	{
+		int memIndex;
+
+		memIndex = (y*(colMode80 ? 80 : 40))+x;
+
+		for (auto c : sText)
+		{
+			VirtualScreenMap[memIndex].chars.CharColor = color;
+			VirtualScreenMap[memIndex].chars.BackgroundColor = background;
+			VirtualScreenMap[memIndex].chars.Inverse = inverse;
+			VirtualScreenMap[memIndex].chars.Alpha_CharColor= alpha_color;
+			VirtualScreenMap[memIndex].chars.Alpha_BackgroundColor = alpha_background;
+			VirtualScreenMap[memIndex].chars.CharCode = c;
+			memIndex += 1;
+		}
 	}
 
 	void Visualizza_Palette()
@@ -288,21 +309,9 @@ public:
 		}
 	}
 
-	void VisualizzaCaratteri()
-	{
-		for (int t = 0; t <= 93; t++) {
-
-			VirtualScreenMap[t].chars.CharCode = 32 + t;
-			VirtualScreenMap[t].chars.CharColor = Palette[32+t];
-			VirtualScreenMap[t].chars.BackgroundColor = colorBorder;
-
-		}
-	}
-
 	// *** posiziona il cursore nello schermo e gestisce l'effetto lampeggìo
 	void Setta_Cursore() 
 	{
-		
 		if (newScreenMemIndex != screenMemIndex) {
 			VirtualScreenMap[screenMemIndex].chars.Inverse = false; // il carattere ' ' spazio
 		}
@@ -313,13 +322,10 @@ public:
 		
 		screenMemIndex = newScreenMemIndex;
 
-		/*
-		if (fTimeEl <= 0.5f)
+		if (fTimeEl <= 0.3f)
 		{
 			VirtualScreenMap[screenMemIndex].chars.Inverse = false; // il carattere ' ' spazio
 		}
-		*/
-
 	}
 
 	// inizializza la virtualscreen map con il carattere ' ' spazio
@@ -381,8 +387,7 @@ public:
 
 		inverse = CharAttrib.chars.Inverse;
 
-		olc::Pixel foregroundColor;
-		olc::Pixel backgroundColor;
+		olc::Pixel foregroundColor;	olc::Pixel backgroundColor;
 
 		foregroundColor.r = CharAttrib.chars.CharColor.R;
 		foregroundColor.g = CharAttrib.chars.CharColor.G;
@@ -440,6 +445,37 @@ public:
 
 	}
 
+	void EffettoTesto() {
+
+		constexpr std::array<int, 256> vPalette = { {
+			16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,
+			17,16,18,19,20,21,22,23,24,25,26,27,28,29,30,31,
+			18,17,16,19,20,21,22,23,24,25,26,27,28,29,30,31,
+			19,18,17,16,20,21,22,23,24,25,26,27,28,29,30,31,
+			20,19,18,17,16,21,22,23,24,25,26,27,28,29,30,31,
+			21,20,19,18,17,16,22,23,24,25,26,27,28,29,30,31,
+			22,21,20,19,18,17,16,23,24,25,26,27,28,29,30,31,
+			23,22,21,20,19,18,17,16,24,25,26,27,28,29,30,31,
+			24,23,22,21,20,19,18,17,16,25,26,27,28,29,30,31,
+			25,24,23,22,21,20,19,18,17,16,26,27,28,29,30,31,
+			26,25,24,23,22,21,20,19,18,17,16,27,28,29,30,31,
+			27,26,25,24,23,22,21,20,19,18,17,16,28,29,30,31,
+			28,27,26,25,24,23,22,21,20,19,18,17,16,29,30,31,
+			29,28,27,26,25,24,23,22,21,20,19,18,17,16,30,31,
+			30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,31,
+			31,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16, } };
+		
+		int indx = 0;
+
+		for (auto c : vPalette)
+		{
+			VirtualScreenMap[indx].chars.CharColor = Palette[c];
+			indx++;
+			if (indx > 15) indx = 0;
+		}
+
+	}
+
 	void Init() {
 		InitPalette();
 
@@ -480,14 +516,14 @@ public:
 		SetDrawTarget(nLayerBackground);
 		FillRect((colMode80 ? 100 : 50), 20, (colMode80 ? 640 : 320), 240, olc::Pixel(colorBorder.R, colorBorder.G, colorBorder.B));
 		
-		// come promemoria
-		//PrintOnVirtualScreen(1, 0, Palette[14], 255, Palette[6], 255, "   **** COMMODORE 64 BASIC V10.0 ****   ");
-		//PrintOnVirtualScreen(2, 0, Palette[227], 255, Palette[6], 255, " 16M RAM SYSTEM 1024K BASIC BYTES FREE ");
-		//PrintOnVirtualScreen(4, 0, Palette[52], 255, Palette[6], 255, "READY.");
+		PrintOnScreen(0,0,"AAAAAAAAAAAAAAA",colorScreen,colorBorder);
+		PrintOnScreen(0, 1, "   **** COMMODORE 64 BASIC V10.0 ****  ", colorScreen, colorBorder);
+		PrintOnScreen(0, 2, " 16M RAM SYSTEM 1024K BASIC BYTES FREE ", colorScreen, colorBorder);
+		PrintOnScreen(0, 4, "READY.", colorScreen, colorBorder);
 
 		//Visualizza_Palette();
-
-		VisualizzaCaratteri();
+		screenMemIndex = (colMode80 ? 400 : 200);
+		newScreenMemIndex = (colMode80 ? 400 : 200);
 
 		Setta_Cursore();
 
@@ -501,12 +537,14 @@ public:
 
 
 	bool OnUserUpdate(float fElapsedTime) override
-	{
+	{	
+		// called once per frame
+		
+		// serve?? boh?
 		//Clear(olc::BLANK);
 
-		// called once per frame
-
 		//SetDrawTarget(nLayerBackground);
+
 		/*
 		for (int y = 0; y < ScreenHeight(); y++)
 		{
@@ -517,80 +555,98 @@ public:
 				Draw(x, y, olc::Pixel(R, G, B));
 		}
 		*/
+
 		//SetDrawTarget(nullptr);
 
 		fTimeEl += fElapsedTime;
 		fTimeChar += fElapsedTime;
+		fTimeFXChar += fElapsedTime;
 
 		Clear(olc::BLANK);
 		
 		strAppo = "";
 		
-		SetDrawTarget(nLayerBackground);
 
+		//SetDrawTarget(nLayerBackground);
+		
 		SyncVirtualScreenMap();
 
-		EnableLayer(nLayerBackground, true);
+		// serve?? boh?
+		//EnableLayer(nLayerBackground, true);
 
+		// visualizza il fontsprite (potrebbe essere il tilemap sprite)
 		//DrawSprite((colMode80 ? 100 : 50), 100, fontSprite);
 		
 		SetDrawTarget(nullptr);
+		
+		if (IsFocused()) {
 
-		if (GetKey(olc::Key::LEFT).bHeld) {
-			strAppo = "LEFT";
-			// sposta il cursore a sinistra
-			if (fTimeChar >= 0.08f) {
-				if (screenMemIndex > 0) newScreenMemIndex -= 1;
-				fTimeChar = 0;
+			if (GetKey(olc::Key::LEFT).bHeld) {
+				strAppo = "LEFT";
+				// sposta il cursore a sinistra
+				if (fTimeChar >= 0.06f) {
+					if (screenMemIndex > 0) newScreenMemIndex -= 1;
+					fTimeChar = 0;
+				}
 			}
-		}
-		if (GetKey(olc::Key::RIGHT).bHeld) {
-			strAppo = "RIGHT";
-			// sposta il cursore a destra
-			if (fTimeChar >= 0.08f) {
-				if (screenMemIndex < (colMode80 ? 2399 : 1199)) newScreenMemIndex += 1;
-				fTimeChar = 0;
+			
+			if (GetKey(olc::Key::RIGHT).bHeld) {
+				strAppo = "RIGHT";
+				// sposta il cursore a destra
+				if (fTimeChar >= 0.06f) {
+					if (screenMemIndex < (colMode80 ? 2399 : 1199)) newScreenMemIndex += 1;
+					fTimeChar = 0;
+				}
 			}
+
+			if (GetKey(olc::Key::UP).bHeld) {
+				strAppo = "UP";
+				if (fTimeChar >= 0.06f) {
+					if (screenMemIndex > (colMode80 ? 79 : 39)) newScreenMemIndex -= (colMode80 ? 80 : 40);
+					fTimeChar = 0;
+				}
+			}
+
+			if (GetKey(olc::Key::DOWN).bHeld) {
+				strAppo = "DOWN";
+				if (fTimeChar >= 0.06f) {
+					if (screenMemIndex < (colMode80 ? 2319 : 1159)) newScreenMemIndex += (colMode80 ? 80 : 40);
+					fTimeChar = 0;
+				}
+			}
+
+			if (GetKey(olc::Key::ENTER).bPressed) {
+				strAppo = "ENTER";
+				if (fTimeChar >= 0.06f) {
+					if (screenMemIndex < (colMode80 ? 2319 : 1159)) newScreenMemIndex = ((cursorRow+1) * (colMode80 ? 80 : 40));
+					fTimeChar = 0;
+				}
+			}
+
 		}
 
-		if (GetKey(olc::Key::UP).bHeld) {
-			strAppo = "UP";
-			if (fTimeChar >= 0.08f) {
-				if (screenMemIndex > (colMode80 ? 79 : 39)) newScreenMemIndex -= (colMode80 ? 80 : 40);
-				fTimeChar = 0;
-			}
-		}
-
-		if (GetKey(olc::Key::DOWN).bHeld) {
-			strAppo = "DOWN";
-			if (fTimeChar >= 0.08f) {
-				if (screenMemIndex < (colMode80 ? 2319 : 1159)) newScreenMemIndex += (colMode80 ? 80 : 40);
-				fTimeChar = 0;
-			}
-		}
-				
 		Setta_Cursore();
+		
+		//EffettoTesto();
 
-		if (strAppo == "") {
-			if (fTimeEl <= 0.5f)
-			{
-				VirtualScreenMap[screenMemIndex].chars.Inverse = false; // il carattere ' ' spazio
-			}
-
-		}
-
-		DrawString((colMode80 ? 100 : 50), 260, "Tasto : " + strAppo);
+		DrawString((colMode80 ? 100 : 50), 260, "Tasto : " + strAppo );
 		DrawString((colMode80 ? 340 : 170), 260, "Tempo : " + tostr(fTimeEl));
-		DrawString((colMode80 ? 100 : 50), 268, "Riga : " + tostr(cursorRow) + "     Colonna : "+ tostr(cursorCol));
-		
-		SetDrawTarget(nLayerBorder);
-	
-		EnableLayer(nLayerBorder, true);
-		
-		SetDrawTarget(nullptr);
+		DrawString((colMode80 ? 100 : 50), 268, "Riga : " + tostr(cursorRow) + "     Colonna : "+ tostr(cursorCol) + "        " + tostr(screenMemIndex));
 
-		if (fTimeEl >= 1.0f) fTimeEl = 0.0f;
+		// timing di azzeramento per lampeggio cursore
+		if (fTimeEl >= 0.6f) fTimeEl = 0.0f;
 
+		/*
+		for (int y = 0; y < 280; y++)
+		{
+			int appo = rand() % 255;
+			BYTE R = Palette[appo].R;
+			BYTE G = Palette[appo].G;
+			BYTE B = Palette[appo].B;
+			for (int x = 0; x < 420; x++)
+				Draw(x, y, olc::Pixel(R, G, B));
+		}
+		*/
 		return true;
 	}
 
@@ -602,6 +658,7 @@ int main() {
 
 	// ScreenMode(true); 80 colonne
 	// ScreenMode(); oppure ScreenMode(false); 40 colonne
+
 	demo.ScreenMode(true);
 
 	return 0;
