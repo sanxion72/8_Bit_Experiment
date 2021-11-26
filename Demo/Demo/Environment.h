@@ -345,7 +345,16 @@ private:
 		
 		LoadCharacterSet(".\\charset.bin", false);
 
-		InitVirtualScreenMap();
+	}
+
+	void Visualizza_Palette()
+	{
+		// visualizza la palette su schermo come carattere spazio inverse con il colore uguale foregroud e background
+		for (int nColor = 0; nColor <= 255; nColor++) {
+			VirtualScreenMap[nColor].chars.CharCode = 32; // il carattere ' ' spazio
+			VirtualScreenMap[nColor].chars.CharForecolor = Palette[nColor];
+			VirtualScreenMap[nColor].chars.CharBackcolor = Palette[nColor];
+		}
 	}
 
 public:
@@ -359,6 +368,8 @@ public:
 
 	void InitScreen(olc::PixelGameEngine* pge) {
 		
+		InitVirtualScreenMap();
+
 		pge->Clear(olc::Pixel::MASK);
 
 		nLayerBorder = pge->CreateLayer();
@@ -374,7 +385,7 @@ public:
 		pge->SetDrawTarget(nLayerBackground);
 		pge->FillRect((ScreenMode ? 100 : 50), 20, (ScreenMode ? 640 : 320), 240, olc::Pixel(ScreenBordercolor.R, ScreenBordercolor.G, ScreenBordercolor.B));
 
-		//Visualizza_Palette();
+		Visualizza_Palette();
 
 		pge->EnableLayer(nLayerBackground, true);
 		pge->SetDrawTarget(nullptr);
@@ -389,16 +400,6 @@ public:
 			SetCharOnScreen(VirtualScreenMap[t], pge);
 		}
 
-	}
-
-	void Visualizza_Palette()
-	{
-		// visualizza la palette su schermo come carattere spazio inverse con il colore uguale foregroud e background
-		for (int nColor = 0; nColor <= 255; nColor++) {
-			VirtualScreenMap[nColor].chars.CharCode = 32; // il carattere ' ' spazio
-			VirtualScreenMap[nColor].chars.CharForecolor = Palette[nColor];
-			VirtualScreenMap[nColor].chars.CharBackcolor = Palette[nColor];
-		}
 	}
 
 };
