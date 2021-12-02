@@ -28,7 +28,7 @@ private:
 		int yCoord; 
 		uint32_t nHalfChar_1;							// contiene i 32 pixel superiori del carattere (8x4)
 		uint32_t nHalfChar_2;							// contiene i 32 pixel inferiori del carattere (8x4)
-		int CharCode = 0;								// codice ASCII (PC) associato al carattere 
+		int CharCodeAscii = 0;							// codice ASCII (PC) associato al carattere 
 	};
 
 	struct charCoord charMap[512];						// array contenente le coordinate di tutti i singoli 512 caratteri all'interno del "fontsprite" caricato
@@ -146,25 +146,10 @@ private:
 		// carica i primi 32 colori - commodore64 color set + 16 scale di grigio
 		for (int pColor = 0; pColor <= 31; pColor++) {
 
-			str.clear();
-			s1 = RGB[pColor].substr(0, 2);
-			str << s1; str >> std::hex >> value;
-			Palette[pColor].R = value;
-
-			str.clear();
-			s1 = RGB[pColor].substr(2, 2);
-			str << s1; str >> std::hex >> value;
-			Palette[pColor].G = value;
-
-			str.clear();
-			s1 = RGB[pColor].substr(4, 2);
-			str << s1; str >> std::hex >> value;
-			Palette[pColor].B = value;
-
-			str.clear();
-			s1 = RGB[pColor].substr(6, 2);
-			str << s1; str >> std::hex >> value;
-			Palette[pColor].A = value;
+			str.clear(); s1 = RGB[pColor].substr(0, 2);	str << s1; str >> std::hex >> value; Palette[pColor].R = value;
+			str.clear(); s1 = RGB[pColor].substr(2, 2);	str << s1; str >> std::hex >> value; Palette[pColor].G = value;
+			str.clear(); s1 = RGB[pColor].substr(4, 2);	str << s1; str >> std::hex >> value; Palette[pColor].B = value;
+			str.clear(); s1 = RGB[pColor].substr(6, 2);	str << s1; str >> std::hex >> value; Palette[pColor].A = value;
 
 		}
 
@@ -231,9 +216,16 @@ private:
 			Count++;
 		}
 
-		// Associa codici ascii ai singoli alementi dll'array charMap
-		for (int cnt=0; cnt <= 93; cnt++) {
-			charMap[cnt].CharCode = 64 + cnt; 
+		// Associa codici ASCII ai singoli elementi dell'array charMap
+		for (int cnt=0; cnt <= 29; cnt++) {
+			charMap[cnt].CharCodeAscii = 64 + cnt; 
+		}
+		
+		charMap[30].CharCodeAscii = 124; //carattere freccia su
+		charMap[31].CharCodeAscii = 126; //carattere freccia sinistra
+
+		for (int cnt = 32; cnt <= 63; cnt++) {
+			charMap[cnt].CharCodeAscii = cnt;
 		}
 
 	}
@@ -304,6 +296,18 @@ private:
 			if (CharAttrib.chars.CharCode >= 64 && CharAttrib.chars.CharCode <= 93) {
 				ox = charMap[CharAttrib.chars.CharCode - 64 + (inverse ? 128 : 0)].xCoord;
 				oy = charMap[CharAttrib.chars.CharCode - 64 + (inverse ? 128 : 0)].yCoord;
+			}
+
+			// carattere freccia su
+			if (CharAttrib.chars.CharCode == 124) {
+				ox = charMap[30 + (inverse ? 128 : 0)].xCoord;
+				oy = charMap[30 + (inverse ? 128 : 0)].yCoord;
+			}
+
+			// carattere freccia sinistra
+			if (CharAttrib.chars.CharCode == 126) {
+				ox = charMap[31 + (inverse ? 128 : 0)].xCoord;
+				oy = charMap[31 + (inverse ? 128 : 0)].yCoord;
 			}
 
 			// da {SPACE} a ?
@@ -377,11 +381,29 @@ private:
 		}
 	}
 
+
+	void Visualizza_Palette_2()
+	{
+		// visualizza la palette su schermo come carattere spazio inverse con il colore uguale foregroud e background
+		int nCol = 0; int nRow = 0;
+
+		for (int nColor = 0; nColor <= 255; nColor++) {
+			VirtualScreenMap[nCol + nRow].chars.CharCode = 32; // il carattere ' ' spazio
+			VirtualScreenMap[nCol + nRow].chars.CharForecolor = Palette[nColor];
+			VirtualScreenMap[nCol + nRow].chars.CharBackcolor = Palette[nColor];
+			if (nCol++ >= 15) {
+				nCol = 0;
+				nRow = nRow + 40;
+			}
+
+		}
+	}
+
 	void Visualizza_Caratteri()
 	{
 		// visualizza i primi 128 caratteri
-		for (int nChar = 0; nChar <= 29; nChar++) {
-			VirtualScreenMap[nChar].chars.CharCode = charMap[nChar].CharCode; // il codice del carattere 
+		for (int nChar = 0; nChar <= 63; nChar++) {
+			VirtualScreenMap[nChar].chars.CharCode = charMap[nChar].CharCodeAscii; // il codice del carattere 
 			VirtualScreenMap[nChar].chars.CharForecolor = ScreenBackcolor;
 			VirtualScreenMap[nChar].chars.CharBackcolor = ScreenBordercolor;
 		}
@@ -419,9 +441,10 @@ public:
 		//PrintOnScreen(0, 1, "   **** COMMODORE 64 BASIC V10.0 ****  ", ScreenBackcolor, ScreenBordercolor);
 		//PrintOnScreen(0, 2, " 16M RAM SYSTEM 1024K BASIC BYTES FREE ", ScreenBackcolor, ScreenBordercolor);
 		//PrintOnScreen(0, 4, "READY.", ScreenBackcolor, ScreenBordercolor);
+		//PrintOnScreen(0, 5, " |~ ~| ", ScreenBackcolor, ScreenBordercolor);
 
-		//Visualizza_Palette();
-		Visualizza_Caratteri();
+		Visualizza_Palette_2();
+		//Visualizza_Caratteri();
 
 		pge->EnableLayer(nLayerBackground, true);
 		pge->SetDrawTarget(nullptr);

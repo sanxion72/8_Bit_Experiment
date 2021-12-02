@@ -24,7 +24,7 @@ public:
 		environment.SyncVirtualScreenMap(this);
 
 		// visualizza il fontsprite (potrebbe essere il tilemap sprite)
-		DrawSprite((colMode80 ? 100 : 50), 100, environment.fontSprite);
+		//DrawSprite((colMode80 ? 100 : 50), 100, environment.fontSprite);
 		
 		return true;
 	}
@@ -43,7 +43,7 @@ int main()
 {
 	Example demo;
 	
-	demo.colMode80 = true;
+	demo.colMode80 = false;
 
 	if (demo.Construct((demo.colMode80 ? 840 : 420), 280, (demo.colMode80 ? 1 : 2), 2))
 		demo.Start();
