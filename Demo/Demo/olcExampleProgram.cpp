@@ -43,7 +43,7 @@ int main()
 {
 	Example demo;
 	
-	demo.colMode80 = false;
+	demo.colMode80 = true;
 
 	if (demo.Construct((demo.colMode80 ? 840 : 420), 280, (demo.colMode80 ? 1 : 2), 2))
 		demo.Start();

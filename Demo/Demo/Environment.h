@@ -17,13 +17,24 @@ private:
 	};
 
 	struct Color Palette[256];
-	Color ScreenBackcolor; Color ScreenBordercolor;			// colori iniziali bordo e sfondo
+
+	Color ScreenBackcolor; Color ScreenBordercolor;		// colori iniziali bordo e sfondo
 
 	int nLayerBackground = 0;
 	int nLayerBorder = 0;
 
+	struct charCoord { 
+		int xCoord; 
+		int yCoord; 
+		uint32_t nHalfChar_1;							// contiene i 32 pixel superiori del carattere (8x4)
+		uint32_t nHalfChar_2;							// contiene i 32 pixel inferiori del carattere (8x4)
+		int CharCode = 0;								// codice ASCII (PC) associato al carattere 
+	};
+
+	struct charCoord charMap[512];						// array contenente le coordinate di tutti i singoli 512 caratteri all'interno del "fontsprite" caricato
+
 	struct CharAttrib {
-		int		CharCode = 0;							// il numero del carattere all'interno della posizione nel chars fontsheet
+		int		CharCode = 0;							// il codice del carattere (ASCII) all'interno della posizione nel chars fontsheet
 		Color	CharForecolor;							// il colore del carattere 
 		Color	CharBackcolor;							// il colore dello sfondo del carattere
 		BOOL	Inverse = false;						// se il carattere è inverso (in negativo)
@@ -32,36 +43,34 @@ private:
 	};
 
 	struct CharCell {
-		int xCoord = 0;	// coordinata X grafica corrispondente
-		int yCoord = 0;	// coordinata Y grafica corrispondente
-		int row = 0;	// coordinata row char mode
-		int col = 0;	// coordinata col char mode
+		int xCoord = 0;									// coordinata X in pixel corrispondente
+		int yCoord = 0;									// coordinata Y in pixel corrispondente
+		int row = 0;									// coordinata row character mode
+		int col = 0;									// coordinata col character mode
 		CharAttrib chars;
 	};
 
-	//array di 2400 elementi che mappa in-memory lo schermo (se modo 40 colonne valgono i primi 1200 elementi altrimenti 2400 elementi;  Per 30 righe con carattere 8x8)
+	//array di 2400 elementi che mappa in-memory lo schermo (se modalità 40 colonne, valgono i primi 1200 elementi, altrimenti tutti i 2400 elementi;  Per 30 righe con carattere 8x8)
 	CharCell VirtualScreenMap[2400];
-
-	struct charCoord { int xCoord; int yCoord; };
-	struct charCoord charMap[512];				// array contenente tutti i caratteri stampabili
 
 	// Inizializza la palette
 	void InitPalette() {				
 
 		std::string RGB[256];
 
-		// Commodore64 Palette
+		// Commodore Palette
 		RGB[0] = "000000ff";		RGB[1] = "FFFFFFff";		RGB[2] = "68372Bff";		RGB[3] = "70A4B2ff";
 		RGB[4] = "6F3D86ff";		RGB[5] = "588D43ff";		RGB[6] = "352879ff";		RGB[7] = "B8C76Fff";
 		RGB[8] = "6F4F25ff";		RGB[9] = "433900ff";		RGB[10] = "9A6759ff";		RGB[11] = "444444ff";
 		RGB[12] = "6C6C6Cff";		RGB[13] = "9AD284ff";		RGB[14] = "6C5EB5ff";		RGB[15] = "959595ff";
 
-		// Gray Scale Palette
+		// Grayscale Palette
 		RGB[16] = "0f0f0fff";		RGB[17] = "1e1e1eff";		RGB[18] = "2d2d2dff";		RGB[19] = "3c3c3cff";
 		RGB[20] = "4b4b4bff";		RGB[21] = "5a5a5aff";		RGB[22] = "696969ff";		RGB[23] = "787878ff";
 		RGB[24] = "878787ff";		RGB[25] = "969696ff";		RGB[26] = "a5a5a5ff";		RGB[27] = "b4b4b4ff";
 		RGB[28] = "c3c3c3ff";		RGB[29] = "d2d2d2ff";		RGB[30] = "e1e1e1ff";		RGB[31] = "f0f0f0ff";
 
+		// Other base palette
 		RGB[32] = "020101FF";		RGB[33] = "040303FF";		RGB[34] = "060404FF";		RGB[35] = "080606FF";
 		RGB[36] = "0A0808FF";		RGB[37] = "0C0909FF";		RGB[38] = "0F0B0BFF";		RGB[39] = "020101FF";
 		RGB[40] = "040202FF";		RGB[41] = "060303FF";		RGB[42] = "080404FF";		RGB[43] = "0A0505FF";
@@ -162,25 +171,10 @@ private:
 		// carica i rimenenti colori
 		for (int pColor = 32; pColor <= 255; pColor++) {
 
-			str.clear();
-			s1 = RGB[pColor].substr(0, 2);
-			str << s1; str >> std::hex >> value;
-			Palette[pColor].R = value * 17;
-
-			str.clear();
-			s1 = RGB[pColor].substr(2, 2);
-			str << s1; str >> std::hex >> value;
-			Palette[pColor].G = value * 17;
-
-			str.clear();
-			s1 = RGB[pColor].substr(4, 2);
-			str << s1; str >> std::hex >> value;
-			Palette[pColor].B = value * 17;
-
-			str.clear();
-			s1 = RGB[pColor].substr(6, 2);
-			str << s1; str >> std::hex >> value;
-			Palette[pColor].A = value;
+			str.clear(); s1 = RGB[pColor].substr(0, 2); str << s1; str >> std::hex >> value; Palette[pColor].R = value * 17;
+			str.clear(); s1 = RGB[pColor].substr(2, 2);	str << s1; str >> std::hex >> value; Palette[pColor].G = value * 17;
+			str.clear(); s1 = RGB[pColor].substr(4, 2);	str << s1; str >> std::hex >> value; Palette[pColor].B = value * 17;
+			str.clear(); s1 = RGB[pColor].substr(6, 2);	str << s1; str >> std::hex >> value; Palette[pColor].A = value;
 
 		}
 
@@ -213,8 +207,11 @@ private:
 
 			uint32_t nHalfChar_2 = sym5 << 24 | sym6 << 16 | sym7 << 8 | sym8;
 
+			// conserva 
 			charMap[Count].xCoord = px + offset_x;
 			charMap[Count].yCoord = py + offset_y;
+			charMap[Count].nHalfChar_1 = nHalfChar_1;
+			charMap[Count].nHalfChar_2 = nHalfChar_2;
 
 			for (int i = 31; i >= 0; i--) {
 				k = nHalfChar_1 & (1 << i) ? 255 : 0;
@@ -234,6 +231,11 @@ private:
 			Count++;
 		}
 
+		// Associa codici ascii ai singoli alementi dll'array charMap
+		for (int cnt=0; cnt <= 93; cnt++) {
+			charMap[cnt].CharCode = 64 + cnt; 
+		}
+
 	}
 
 	// inizializza la virtualscreen map con il carattere ' ' spazio
@@ -249,7 +251,7 @@ private:
 				VirtualScreenMap[index].col = colonna;
 				VirtualScreenMap[index].xCoord = (ScreenMode ? 100 : 50) + offsetColonna;
 				VirtualScreenMap[index].yCoord = 20 + offsetRiga;
-				VirtualScreenMap[index].chars.CharCode = 32; // il carattere ' ' spazio
+				VirtualScreenMap[index].chars.CharCode = 32; // il codice del carattere ' ' (spazio)
 				VirtualScreenMap[index].chars.CharForecolor = ScreenBackcolor;
 				VirtualScreenMap[index].chars.CharBackcolor = ScreenBordercolor;
 
@@ -337,6 +339,24 @@ private:
 
 	}
 
+	void PrintOnScreen(int32_t x, int32_t y, const std::string& sText, Color color, Color background, BOOL inverse = false, BYTE alpha_color = 255, BYTE alpha_background = 255)
+	{
+		int memIndex;
+
+		memIndex = (y * (ScreenMode ? 80 : 40)) + x;
+
+		for (auto c : sText)
+		{
+			VirtualScreenMap[memIndex].chars.CharForecolor = color;
+			VirtualScreenMap[memIndex].chars.CharBackcolor = background;
+			VirtualScreenMap[memIndex].chars.Inverse = inverse;
+			VirtualScreenMap[memIndex].chars.Alpha_CharColor = alpha_color;
+			VirtualScreenMap[memIndex].chars.Alpha_BackgroundColor = alpha_background;
+			VirtualScreenMap[memIndex].chars.CharCode = c;
+			memIndex += 1;
+		}
+	}
+
 	void Init() {
 		InitPalette();
 
@@ -356,6 +376,17 @@ private:
 			VirtualScreenMap[nColor].chars.CharBackcolor = Palette[nColor];
 		}
 	}
+
+	void Visualizza_Caratteri()
+	{
+		// visualizza i primi 128 caratteri
+		for (int nChar = 0; nChar <= 29; nChar++) {
+			VirtualScreenMap[nChar].chars.CharCode = charMap[nChar].CharCode; // il codice del carattere 
+			VirtualScreenMap[nChar].chars.CharForecolor = ScreenBackcolor;
+			VirtualScreenMap[nChar].chars.CharBackcolor = ScreenBordercolor;
+		}
+	}
+
 
 public:
 	olc::Sprite* fontSprite = nullptr;
@@ -385,7 +416,12 @@ public:
 		pge->SetDrawTarget(nLayerBackground);
 		pge->FillRect((ScreenMode ? 100 : 50), 20, (ScreenMode ? 640 : 320), 240, olc::Pixel(ScreenBordercolor.R, ScreenBordercolor.G, ScreenBordercolor.B));
 
-		Visualizza_Palette();
+		//PrintOnScreen(0, 1, "   **** COMMODORE 64 BASIC V10.0 ****  ", ScreenBackcolor, ScreenBordercolor);
+		//PrintOnScreen(0, 2, " 16M RAM SYSTEM 1024K BASIC BYTES FREE ", ScreenBackcolor, ScreenBordercolor);
+		//PrintOnScreen(0, 4, "READY.", ScreenBackcolor, ScreenBordercolor);
+
+		//Visualizza_Palette();
+		Visualizza_Caratteri();
 
 		pge->EnableLayer(nLayerBackground, true);
 		pge->SetDrawTarget(nullptr);
