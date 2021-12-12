@@ -389,6 +389,10 @@ private:
 
 	}
 
+	void ShiftPixel() {
+
+	}
+
 	void PrintOnScreen(int32_t x, int32_t y, const std::string& sText, Color color, Color background, BOOL inverse = false, BYTE alpha_color = 255, BYTE alpha_background = 255)
 	{
 		int memIndex;
@@ -433,6 +437,7 @@ private:
 	{
 		// visualizza la palette su schermo come carattere spazio inverse con il colore uguale foregroud e background
 		int nCol = 0; int nRow = 0;
+		nRow = (ScreenMode ? 80 : 40) * 4;
 
 		for (int nColor = 0; nColor <= 255; nColor++) {
 			VirtualScreenMap[nCol + nRow].chars.CharCode = 32; // il carattere ' ' spazio
@@ -491,7 +496,7 @@ public:
 
 		Visualizza_Palette_2();
 		//Visualizza_Palette();
-		//Visualizza_Caratteri();
+		Visualizza_Caratteri();
 
 		pge->EnableLayer(nLayerBackground, true);
 		pge->SetDrawTarget(nullptr);

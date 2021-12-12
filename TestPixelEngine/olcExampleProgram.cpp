@@ -714,7 +714,7 @@ int main() {
 	// ScreenMode(true); 80 colonne
 	// ScreenMode(); oppure ScreenMode(false); 40 colonne
 
-	demo.ScreenMode(true);
+	demo.ScreenMode(false);
 
 	return 0;
 }

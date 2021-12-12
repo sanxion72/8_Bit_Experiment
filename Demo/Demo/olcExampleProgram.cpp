@@ -7,34 +7,53 @@ class Example : public olc::PixelGameEngine
 private: 
 	
 public:
-	Example()
+
+	// contatore del tempo trascorso per il flash del cursore
+	float fTimeEl = 0.0f;
+
+	template <typename T> std::string tostr(const T& t)
 	{
+		std::ostringstream os;
+		os << t;
+		return os.str();
+	}
+
+	Example() {
 		sAppName = "Esempio";
 	}
 
 	BOOL colMode80;	// true: 80 coloumn mode; false: 40 coloumn mode;
 
-	bool OnUserCreate() override
-	{
+	bool OnUserCreate() override {
 		// Called once at the start, so create things here
 		
 		environment.ScreenMode = colMode80;
 		environment.InitScreen(this);
 
+		return true;
+	}
+
+	bool OnUserUpdate(float fElapsedTime) override {
+		// called once per frame
+		fTimeEl += fElapsedTime;
+
+		Clear(olc::BLANK);
+
 		environment.SyncVirtualScreenMap(this);
 
 		// visualizza il fontsprite (potrebbe essere il tilemap sprite)
 		//DrawSprite((colMode80 ? 100 : 50), 100, environment.fontSprite);
+
+		SetDrawTarget(nullptr);
+
+		DrawString((colMode80 ? 340 : 170), 260, "Tempo : " + tostr(fTimeEl));
 		
-		return true;
-	}
-
-	bool OnUserUpdate(float fElapsedTime) override
-	{
-		// called once per frame
+		// timing di azzeramento per lampeggio cursore
+		if (fTimeEl >= 0.6f) fTimeEl = 0.0f;
 
 		return true;
 	}
+
 protected:
 	Environment environment;
 };
