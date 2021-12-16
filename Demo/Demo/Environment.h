@@ -30,27 +30,23 @@ private:
 	struct charCoord { 
 		int xCoord; 
 		int yCoord; 
-		uint32_t nHalfChar_1;							// contiene i 32 pixel superiori del carattere (8x4)
-		uint32_t nHalfChar_2;							// contiene i 32 pixel inferiori del carattere (8x4)
-		int CharCodeAscii = 0;							// codice ASCII (PC) associato al carattere 
+		//int CharCodeAscii = 0;							// codice ASCII (PC) associato al carattere 
 	};
 
 	struct charCoord charMap[512];						// array contenente le coordinate di tutti i singoli 512 caratteri all'interno del "fontsprite" caricato
 
 	struct CharAttrib {
-		int		CharCode = 0;							// il codice del carattere (ASCII) all'interno della posizione nel chars fontsheet
-		Color	CharForecolor;							// il colore del carattere 
-		Color	CharBackcolor;							// il colore dello sfondo del carattere
-		BOOL	Inverse = false;						// se il carattere è inverso (in negativo)
+		int				CharCode = 0;					// il codice del carattere (ASCII) all'interno della posizione nel chars fontsheet
+		Color			CharForecolor;					// il colore del carattere 
+		Color			CharBackcolor;					// il colore dello sfondo del carattere
+		BOOL			Inverse = false;				// se il carattere è inverso (in negativo)
 		unsigned char	Alpha_BackgroundColor = 255;	// canale alfa dello sfondo (255 pieno)
 		unsigned char	Alpha_CharColor = 255;			// canale alfa del carattere (255 pieno)
 	};
 
 	struct CharCell {
-		int xCoord = 0;									// coordinata X in pixel corrispondente
-		int yCoord = 0;									// coordinata Y in pixel corrispondente
-		int row = 0;									// coordinata row character mode
-		int col = 0;									// coordinata col character mode
+		int xCoord = 0, yCoord = 0;					// coordinate X,Y in pixel corrispondente
+		int row = 0, col = 0;						// coordinate row,col character mode
 		CharAttrib chars;
 	};
 
@@ -241,8 +237,6 @@ private:
 			// conserva 
 			charMap[Count].xCoord = px + offset_x;
 			charMap[Count].yCoord = py + offset_y;
-			charMap[Count].nHalfChar_1 = nHalfChar_1;
-			charMap[Count].nHalfChar_2 = nHalfChar_2;
 
 			for (int i = 31; i >= 0; i--) {
 				k = nHalfChar_1 & (1 << i) ? 255 : 0;
@@ -261,7 +255,8 @@ private:
 
 			Count++;
 		}
-
+		
+		/*
 		// Associa codici ASCII ai singoli elementi dell'array charMap
 		for (int cnt=0; cnt <= 29; cnt++) {
 			charMap[cnt].CharCodeAscii = 64 + cnt; 
@@ -273,6 +268,7 @@ private:
 		for (int cnt = 32; cnt <= 63; cnt++) {
 			charMap[cnt].CharCodeAscii = cnt;
 		}
+		*/
 
 	}
 
@@ -389,9 +385,6 @@ private:
 
 	}
 
-	void ShiftPixel() {
-
-	}
 
 	void PrintOnScreen(int32_t x, int32_t y, const std::string& sText, Color color, Color background, BOOL inverse = false, BYTE alpha_color = 255, BYTE alpha_background = 255)
 	{
@@ -418,7 +411,7 @@ private:
 		ScreenBackcolor = Palette[14];
 		ScreenBordercolor = Palette[6];
 		
-		LoadCharacterSet(".\\charset.bin", false);
+		LoadCharacterSet(".\\fonts\\quadrato.64c", true);
 
 	}
 
@@ -432,12 +425,11 @@ private:
 		}
 	}
 
-
 	void Visualizza_Palette_2()
 	{
 		// visualizza la palette su schermo come carattere spazio inverse con il colore uguale foregroud e background
 		int nCol = 0; int nRow = 0;
-		nRow = (ScreenMode ? 80 : 40) * 4;
+		nRow = (ScreenMode ? 80 : 40) * 6;
 
 		for (int nColor = 0; nColor <= 255; nColor++) {
 			VirtualScreenMap[nCol + nRow].chars.CharCode = 32; // il carattere ' ' spazio
@@ -449,7 +441,7 @@ private:
 			}
 		}
 	}
-
+	/*
 	void Visualizza_Caratteri()
 	{
 		// visualizza i primi 128 caratteri
@@ -459,10 +451,22 @@ private:
 			VirtualScreenMap[nChar].chars.CharBackcolor = ScreenBordercolor;
 		}
 	}
-
+	*/
 
 public:
 	olc::Sprite* fontSprite = nullptr;
+
+	int cursorRow = 0;
+	int cursorCol = 0;
+
+	int screenMemIndex;
+	int newScreenMemIndex;
+
+	// contatore del tempo trascorso per il flash del cursore
+	float fTimeEl = 0.0f;
+	// contatore del tempo trascorso per la scrittura del carattere su schermo
+	float fTimeChar = 0.0f;
+
 
 	Environment() {
 		Init();
@@ -489,14 +493,14 @@ public:
 		pge->SetDrawTarget(nLayerBackground);
 		pge->FillRect((ScreenMode ? 100 : 50), 20, (ScreenMode ? 640 : 320), 240, olc::Pixel(ScreenBordercolor.R, ScreenBordercolor.G, ScreenBordercolor.B));
 
-		//PrintOnScreen(0, 1, "   **** COMMODORE 64 BASIC V10.0 ****  ", ScreenBackcolor, ScreenBordercolor);
-		//PrintOnScreen(0, 2, " 16M RAM SYSTEM 1024K BASIC BYTES FREE ", ScreenBackcolor, ScreenBordercolor);
-		//PrintOnScreen(0, 4, "READY.", ScreenBackcolor, ScreenBordercolor);
+		PrintOnScreen(0, 1, "   **** COMMODORE 64 BASIC V10.0 ****  ", ScreenBackcolor, ScreenBordercolor);
+		PrintOnScreen(0, 2, " 16M RAM SYSTEM 1024K BASIC BYTES FREE ", ScreenBackcolor, ScreenBordercolor);
+		PrintOnScreen(0, 4, "READY.", ScreenBackcolor, ScreenBordercolor);
 		//PrintOnScreen(0, 5, " |~ ~| ", ScreenBackcolor, ScreenBordercolor);
 
-		Visualizza_Palette_2();
+		//Visualizza_Palette_2();
 		//Visualizza_Palette();
-		Visualizza_Caratteri();
+		//Visualizza_Caratteri();
 
 		pge->EnableLayer(nLayerBackground, true);
 		pge->SetDrawTarget(nullptr);
@@ -512,6 +516,24 @@ public:
 		}
 
 	}
+	// *** posiziona il cursore nello schermo e gestisce l'effetto lampeggìo
+	void SetCursor(olc::PixelGameEngine* pge, std::string keyPressed)
+	{
+		if (newScreenMemIndex != screenMemIndex)  {
+			// se mi sono spostato col cursore, ripristina il carattere da cui provengo 
+			VirtualScreenMap[screenMemIndex].chars.Inverse = false; // il carattere ' ' spazio
+		}
+		
+		VirtualScreenMap[newScreenMemIndex].chars.Inverse = true; // il carattere ' ' spazio
+		cursorRow = VirtualScreenMap[newScreenMemIndex].row;
+		cursorCol = VirtualScreenMap[newScreenMemIndex].col;
+
+		screenMemIndex = newScreenMemIndex;
+
+		if ((fTimeEl <= 0.3f) && (keyPressed.empty()))
+		{
+			VirtualScreenMap[screenMemIndex].chars.Inverse = false; // il carattere ' ' spazio
+		}
+	}
 
 };
-

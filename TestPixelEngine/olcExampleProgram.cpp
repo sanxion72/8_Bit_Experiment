@@ -568,7 +568,6 @@ public:
 		
 		strAppo = "";
 		
-
 		//SetDrawTarget(nLayerBackground);
 		
 		SyncVirtualScreenMap();
