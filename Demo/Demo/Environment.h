@@ -386,23 +386,6 @@ private:
 	}
 
 
-	void PrintOnScreen(int32_t x, int32_t y, const std::string& sText, Color color, Color background, BOOL inverse = false, BYTE alpha_color = 255, BYTE alpha_background = 255)
-	{
-		int memIndex;
-
-		memIndex = (y * (ScreenMode ? 80 : 40)) + x;
-
-		for (auto c : sText)
-		{
-			VirtualScreenMap[memIndex].chars.CharForecolor = color;
-			VirtualScreenMap[memIndex].chars.CharBackcolor = background;
-			VirtualScreenMap[memIndex].chars.Inverse = inverse;
-			VirtualScreenMap[memIndex].chars.Alpha_CharColor = alpha_color;
-			VirtualScreenMap[memIndex].chars.Alpha_BackgroundColor = alpha_background;
-			VirtualScreenMap[memIndex].chars.CharCode = c;
-			memIndex += 1;
-		}
-	}
 
 	void Init() {
 		
@@ -474,6 +457,24 @@ public:
 
 	BOOL ScreenMode;
 
+	void PrintOnScreen(int32_t x, int32_t y, const std::string& sText, Color color, Color background, BOOL inverse = false, BYTE alpha_color = 255, BYTE alpha_background = 255)
+	{
+		int memIndex;
+
+		memIndex = (y * (ScreenMode ? 80 : 40)) + x;
+
+		for (auto c : sText)
+		{
+			VirtualScreenMap[memIndex].chars.CharForecolor = color;
+			VirtualScreenMap[memIndex].chars.CharBackcolor = background;
+			VirtualScreenMap[memIndex].chars.Inverse = inverse;
+			VirtualScreenMap[memIndex].chars.Alpha_CharColor = alpha_color;
+			VirtualScreenMap[memIndex].chars.Alpha_BackgroundColor = alpha_background;
+			VirtualScreenMap[memIndex].chars.CharCode = c;
+			memIndex += 1;
+		}
+	}
+
 	void InitScreen(olc::PixelGameEngine* pge) {
 		
 		InitVirtualScreenMap();
@@ -508,6 +509,12 @@ public:
 		pge->SetPixelMode(olc::Pixel::NORMAL);
 
 	}
+	
+	void GetRowColFromPosition(int& nRow, int& nCol, int nPosition) {
+		nRow = VirtualScreenMap[nPosition].row;
+		nCol = VirtualScreenMap[nPosition].col;
+	}
+
 
 	void SyncVirtualScreenMap(olc::PixelGameEngine* pge) {
 
