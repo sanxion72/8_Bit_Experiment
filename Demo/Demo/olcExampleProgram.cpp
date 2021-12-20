@@ -47,7 +47,7 @@ public:
 		environment.SyncVirtualScreenMap(this);
 
 		// visualizza il fontsprite (potrebbe essere il tilemap sprite)
-		//DrawSprite((colMode80 ? 100 : 50), 100, environment.fontSprite);
+		DrawSprite((colMode80 ? 100 : 50), 100, environment.fontSprite);
 
 		SetDrawTarget(nullptr);
 
@@ -104,10 +104,39 @@ public:
 			else { if (GetKey(olc::Key::Y).bPressed) { strAppo = "y"; } }
 			if (GetKey(olc::Key::Z).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "Z"; }
 			else { if (GetKey(olc::Key::Z).bPressed) { strAppo = "z"; } }
+
+			if (GetKey(olc::Key::K1).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "!"; }
+			else { if (GetKey(olc::Key::K1).bPressed) { strAppo = "1"; } }
+			if (GetKey(olc::Key::K2).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "\""; }
+			else { if (GetKey(olc::Key::K2).bPressed) { strAppo = "2"; } }
+			if (GetKey(olc::Key::K3).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "£"; }
+			else { if (GetKey(olc::Key::K3).bPressed) { strAppo = "3"; } }
+			if (GetKey(olc::Key::K4).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "$"; }
+			else { if (GetKey(olc::Key::K4).bPressed) { strAppo = "4"; } }
+			if (GetKey(olc::Key::K5).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "%"; }
+			else { if (GetKey(olc::Key::K5).bPressed) { strAppo = "5"; } }
+			if (GetKey(olc::Key::K6).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "&"; }
+			else { if (GetKey(olc::Key::K6).bPressed) { strAppo = "6"; } }
+			if (GetKey(olc::Key::K7).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "/"; }
+			else { if (GetKey(olc::Key::K7).bPressed) { strAppo = "7"; } }
+			if (GetKey(olc::Key::K8).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "("; }
+			else { if (GetKey(olc::Key::K8).bPressed) { strAppo = "8"; } }
+			if (GetKey(olc::Key::K9).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = ")"; }
+			else { if (GetKey(olc::Key::K9).bPressed) { strAppo = "9"; } }
+			if (GetKey(olc::Key::K0).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "="; }
+			else { if (GetKey(olc::Key::K0).bPressed) { strAppo = "0"; } }
+			if (GetKey(olc::Key::COMMA).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = ";"; }
+			else { if (GetKey(olc::Key::COMMA).bPressed) { strAppo = ","; } }
+			if (GetKey(olc::Key::SPACE).bPressed ) { strAppo = " "; }
+			
+
+
 			if (!strAppo.empty()) {
-				environment.PrintOnScreen(environment.cursorCol, environment.cursorRow, strAppo);
-				environment.newScreenMemIndex += 1;
-				environment.fTimeChar = 0;
+				if (environment.fTimeChar >= 0.06f) {
+					environment.PrintOnScreen(environment.cursorCol, environment.cursorRow, strAppo);
+					environment.newScreenMemIndex += 1;
+					environment.fTimeChar = 0;
+				}
 			}
 			if (GetKey(olc::Key::LEFT).bPressed) {
 				strAppo = "LEFT";
@@ -172,7 +201,7 @@ int main()
 {
 	Example demo;
 	
-	demo.colMode80 = true;
+	demo.colMode80 = false;
 
 	if (demo.Construct((demo.colMode80 ? 840 : 420), 280, (demo.colMode80 ? 1 : 2), 2))
 		demo.Start();

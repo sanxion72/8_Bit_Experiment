@@ -494,9 +494,9 @@ public:
 		pge->SetDrawTarget(nLayerBackground);
 		pge->FillRect((ScreenMode ? 100 : 50), 20, (ScreenMode ? 640 : 320), 240, olc::Pixel(ScreenBordercolor.R, ScreenBordercolor.G, ScreenBordercolor.B));
 
-		PrintOnScreen(0, 1, "   **** COMMODORE 64 BASIC V10.0 ****  ");
-		PrintOnScreen(0, 2, " 16M RAM SYSTEM 1024K BASIC BYTES FREE ");
-		PrintOnScreen(0, 4, "READY.");
+		PrintOnScreen(0, 1, "   **** Commodore 64 Basic V10.0 ****  ");
+		PrintOnScreen(0, 2, " 16M RAM system 1024K basic bytes free ");
+		PrintOnScreen(0, 4, "Ready.");
 		//PrintOnScreen(0, 5, " |~ ~| ");
 
 		//Visualizza_Palette_2();
