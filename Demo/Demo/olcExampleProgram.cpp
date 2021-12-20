@@ -52,61 +52,63 @@ public:
 		SetDrawTarget(nullptr);
 
 		if (IsFocused()) {
-			if (GetKey(olc::Key::A).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "A"; }
-			else { if (GetKey(olc::Key::A).bHeld) { strAppo = "a"; } }
-			if (GetKey(olc::Key::B).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "B"; }
-			else { if (GetKey(olc::Key::B).bHeld) { strAppo = "b"; } }
-			if (GetKey(olc::Key::C).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "C"; }
-			else { if (GetKey(olc::Key::C).bHeld) { strAppo = "c"; } }
-			if (GetKey(olc::Key::D).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "D"; }
-			else { if (GetKey(olc::Key::D).bHeld) { strAppo = "d"; } }
-			if (GetKey(olc::Key::E).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "E"; }
-			else { if (GetKey(olc::Key::E).bHeld) { strAppo = "e"; } }
-			if (GetKey(olc::Key::F).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "F"; }
-			else { if (GetKey(olc::Key::F).bHeld) { strAppo = "f"; } }
-			if (GetKey(olc::Key::G).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "G"; }
-			else { if (GetKey(olc::Key::G).bHeld) { strAppo = "g"; } }
-			if (GetKey(olc::Key::H).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "H"; }
-			else { if (GetKey(olc::Key::H).bHeld) { strAppo = "h"; } }
-			if (GetKey(olc::Key::I).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "I"; }
-			else { if (GetKey(olc::Key::I).bHeld) { strAppo = "i"; } }
-			if (GetKey(olc::Key::J).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "J"; }
-			else { if (GetKey(olc::Key::J).bHeld) { strAppo = "j"; } }
-			if (GetKey(olc::Key::K).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "K"; }
-			else { if (GetKey(olc::Key::K).bHeld) { strAppo = "k"; } }
-			if (GetKey(olc::Key::L).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "L"; }
-			else { if (GetKey(olc::Key::L).bHeld) { strAppo = "l"; } }
-			if (GetKey(olc::Key::M).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "M"; }
-			else { if (GetKey(olc::Key::M).bHeld) { strAppo = "m"; } }
-			if (GetKey(olc::Key::N).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "N"; }
-			else { if (GetKey(olc::Key::N).bHeld) { strAppo = "n"; } }
-			if (GetKey(olc::Key::O).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "O"; }
-			else { if (GetKey(olc::Key::O).bHeld) { strAppo = "o"; } }
-			if (GetKey(olc::Key::P).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "P"; }
-			else { if (GetKey(olc::Key::P).bHeld) { strAppo = "p"; } }
-			if (GetKey(olc::Key::Q).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "Q"; }
-			else { if (GetKey(olc::Key::Q).bHeld) { strAppo = "q"; } }
-			if (GetKey(olc::Key::R).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "R"; }
-			else { if (GetKey(olc::Key::R).bHeld) { strAppo = "r"; } }
-			if (GetKey(olc::Key::S).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "S"; }
-			else { if (GetKey(olc::Key::S).bHeld) { strAppo = "s"; } }
-			if (GetKey(olc::Key::T).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "T"; }
-			else { if (GetKey(olc::Key::T).bHeld) { strAppo = "t"; } }
-			if (GetKey(olc::Key::U).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "U"; }
-			else { if (GetKey(olc::Key::U).bHeld) { strAppo = "u"; } }
-			if (GetKey(olc::Key::V).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "V"; }
-			else { if (GetKey(olc::Key::V).bHeld) { strAppo = "v"; } }
-			if (GetKey(olc::Key::W).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "W"; }
-			else { if (GetKey(olc::Key::W).bHeld) { strAppo = "w"; } }
-			if (GetKey(olc::Key::X).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "X"; }
-			else { if (GetKey(olc::Key::X).bHeld) { strAppo = "x"; } }
-			if (GetKey(olc::Key::Y).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "Y"; }
-			else { if (GetKey(olc::Key::Y).bHeld) { strAppo = "y"; } }
-			if (GetKey(olc::Key::Z).bHeld && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "Z"; }
-			else { if (GetKey(olc::Key::Z).bHeld) { strAppo = "z"; } }
-
-			environment.PrintOnScreen(environment.cursorCol,environment.cursorRow,strAppo,)
-
+			if (GetKey(olc::Key::A).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "A"; }
+			else { if (GetKey(olc::Key::A).bPressed) { strAppo = "a"; } }
+			if (GetKey(olc::Key::B).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "B"; }
+			else { if (GetKey(olc::Key::B).bPressed) { strAppo = "b"; } }
+			if (GetKey(olc::Key::C).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "C"; }
+			else { if (GetKey(olc::Key::C).bPressed) { strAppo = "c"; } }
+			if (GetKey(olc::Key::D).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "D"; }
+			else { if (GetKey(olc::Key::D).bPressed) { strAppo = "d"; } }
+			if (GetKey(olc::Key::E).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "E"; }
+			else { if (GetKey(olc::Key::E).bPressed) { strAppo = "e"; } }
+			if (GetKey(olc::Key::F).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "F"; }
+			else { if (GetKey(olc::Key::F).bPressed) { strAppo = "f"; } }
+			if (GetKey(olc::Key::G).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "G"; }
+			else { if (GetKey(olc::Key::G).bPressed) { strAppo = "g"; } }
+			if (GetKey(olc::Key::H).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "H"; }
+			else { if (GetKey(olc::Key::H).bPressed) { strAppo = "h"; } }
+			if (GetKey(olc::Key::I).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "I"; }
+			else { if (GetKey(olc::Key::I).bPressed) { strAppo = "i"; } }
+			if (GetKey(olc::Key::J).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "J"; }
+			else { if (GetKey(olc::Key::J).bPressed) { strAppo = "j"; } }
+			if (GetKey(olc::Key::K).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "K"; }
+			else { if (GetKey(olc::Key::K).bPressed) { strAppo = "k"; } }
+			if (GetKey(olc::Key::L).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "L"; }
+			else { if (GetKey(olc::Key::L).bPressed) { strAppo = "l"; } }
+			if (GetKey(olc::Key::M).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "M"; }
+			else { if (GetKey(olc::Key::M).bPressed) { strAppo = "m"; } }
+			if (GetKey(olc::Key::N).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "N"; }
+			else { if (GetKey(olc::Key::N).bPressed) { strAppo = "n"; } }
+			if (GetKey(olc::Key::O).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "O"; }
+			else { if (GetKey(olc::Key::O).bPressed) { strAppo = "o"; } }
+			if (GetKey(olc::Key::P).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "P"; }
+			else { if (GetKey(olc::Key::P).bPressed) { strAppo = "p"; } }
+			if (GetKey(olc::Key::Q).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "Q"; }
+			else { if (GetKey(olc::Key::Q).bPressed) { strAppo = "q"; } }
+			if (GetKey(olc::Key::R).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "R"; }
+			else { if (GetKey(olc::Key::R).bPressed) { strAppo = "r"; } }
+			if (GetKey(olc::Key::S).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "S"; }
+			else { if (GetKey(olc::Key::S).bPressed) { strAppo = "s"; } }
+			if (GetKey(olc::Key::T).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "T"; }
+			else { if (GetKey(olc::Key::T).bPressed) { strAppo = "t"; } }
+			if (GetKey(olc::Key::U).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "U"; }
+			else { if (GetKey(olc::Key::U).bPressed) { strAppo = "u"; } }
+			if (GetKey(olc::Key::V).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "V"; }
+			else { if (GetKey(olc::Key::V).bPressed) { strAppo = "v"; } }
+			if (GetKey(olc::Key::W).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "W"; }
+			else { if (GetKey(olc::Key::W).bPressed) { strAppo = "w"; } }
+			if (GetKey(olc::Key::X).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "X"; }
+			else { if (GetKey(olc::Key::X).bPressed) { strAppo = "x"; } }
+			if (GetKey(olc::Key::Y).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "Y"; }
+			else { if (GetKey(olc::Key::Y).bPressed) { strAppo = "y"; } }
+			if (GetKey(olc::Key::Z).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "Z"; }
+			else { if (GetKey(olc::Key::Z).bPressed) { strAppo = "z"; } }
+			if (!strAppo.empty()) {
+				environment.PrintOnScreen(environment.cursorCol, environment.cursorRow, strAppo);
+				environment.newScreenMemIndex += 1;
+				environment.fTimeChar = 0;
+			}
 			if (GetKey(olc::Key::LEFT).bPressed) {
 				strAppo = "LEFT";
 				// sposta il cursore a sinistra

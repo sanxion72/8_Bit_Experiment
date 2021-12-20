@@ -394,7 +394,7 @@ private:
 		ScreenBackcolor = Palette[14];
 		ScreenBordercolor = Palette[6];
 		
-		LoadCharacterSet(".\\fonts\\quadrato.64c", true);
+		LoadCharacterSet(".\\charset.bin", false);
 
 	}
 
@@ -457,7 +457,7 @@ public:
 
 	BOOL ScreenMode;
 
-	void PrintOnScreen(int32_t x, int32_t y, const std::string& sText, Color color, Color background, BOOL inverse = false, BYTE alpha_color = 255, BYTE alpha_background = 255)
+	void PrintOnScreen(int32_t x, int32_t y, const std::string& sText, BOOL inverse = false, BYTE alpha_color = 255, BYTE alpha_background = 255)
 	{
 		int memIndex;
 
@@ -465,8 +465,8 @@ public:
 
 		for (auto c : sText)
 		{
-			VirtualScreenMap[memIndex].chars.CharForecolor = color;
-			VirtualScreenMap[memIndex].chars.CharBackcolor = background;
+			VirtualScreenMap[memIndex].chars.CharForecolor = ScreenBackcolor;
+			VirtualScreenMap[memIndex].chars.CharBackcolor = ScreenBordercolor;
 			VirtualScreenMap[memIndex].chars.Inverse = inverse;
 			VirtualScreenMap[memIndex].chars.Alpha_CharColor = alpha_color;
 			VirtualScreenMap[memIndex].chars.Alpha_BackgroundColor = alpha_background;
@@ -494,10 +494,10 @@ public:
 		pge->SetDrawTarget(nLayerBackground);
 		pge->FillRect((ScreenMode ? 100 : 50), 20, (ScreenMode ? 640 : 320), 240, olc::Pixel(ScreenBordercolor.R, ScreenBordercolor.G, ScreenBordercolor.B));
 
-		PrintOnScreen(0, 1, "   **** COMMODORE 64 BASIC V10.0 ****  ", ScreenBackcolor, ScreenBordercolor);
-		PrintOnScreen(0, 2, " 16M RAM SYSTEM 1024K BASIC BYTES FREE ", ScreenBackcolor, ScreenBordercolor);
-		PrintOnScreen(0, 4, "READY.", ScreenBackcolor, ScreenBordercolor);
-		//PrintOnScreen(0, 5, " |~ ~| ", ScreenBackcolor, ScreenBordercolor);
+		PrintOnScreen(0, 1, "   **** COMMODORE 64 BASIC V10.0 ****  ");
+		PrintOnScreen(0, 2, " 16M RAM SYSTEM 1024K BASIC BYTES FREE ");
+		PrintOnScreen(0, 4, "READY.");
+		//PrintOnScreen(0, 5, " |~ ~| ");
 
 		//Visualizza_Palette_2();
 		//Visualizza_Palette();
