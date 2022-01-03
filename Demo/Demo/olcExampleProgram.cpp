@@ -17,7 +17,7 @@ public:
 	}
 
 	Example() {
-		sAppName = "Esempio";
+		sAppName = "CommodoreNGNX";
 	}
 
 	BOOL colMode80;	// true: 80 coloumn mode; false: 40 coloumn mode;
@@ -127,8 +127,30 @@ public:
 			else { if (GetKey(olc::Key::K0).bPressed) { strAppo = "0"; } }
 			if (GetKey(olc::Key::COMMA).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = ";"; }
 			else { if (GetKey(olc::Key::COMMA).bPressed) { strAppo = ","; } }
-			if (GetKey(olc::Key::SPACE).bPressed ) { strAppo = " "; }
+			if (GetKey(olc::Key::PERIOD).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = ":"; }
+			else { if (GetKey(olc::Key::PERIOD).bPressed) { strAppo = "."; } }
+			if (GetKey(olc::Key::MINUS).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = ">"; }
+			else { if (GetKey(olc::Key::MINUS).bPressed) { strAppo = "<"; } }
+
+
+			if (GetKey(olc::Key::SPACE).bPressed ) { 
+				strAppo = " ";
+				if (environment.fTimeChar >= 0.06f) {
+					if (environment.screenMemIndex < (colMode80 ? 2399 : 1199)) environment.newScreenMemIndex += 1;
+					environment.PrintOnScreen(environment.cursorCol, environment.cursorRow, " ");
+					environment.fTimeChar = 0;
+				}
+			}
 			
+			if (GetKey(olc::Key::BACK).bPressed) { 
+				// sposta il cursore a sinistra
+				if (environment.fTimeChar >= 0.06f) {
+					if (environment.screenMemIndex > 0) environment.newScreenMemIndex -= 1;
+					environment.PrintOnScreen(environment.cursorCol-1, environment.cursorRow, " ");
+					environment.fTimeChar = 0;
+				}
+
+			}
 
 
 			if (!strAppo.empty()) {
