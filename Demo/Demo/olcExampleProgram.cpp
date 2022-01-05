@@ -104,7 +104,7 @@ public:
 			else { if (GetKey(olc::Key::Y).bPressed) { strAppo = "y"; } }
 			if (GetKey(olc::Key::Z).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "Z"; }
 			else { if (GetKey(olc::Key::Z).bPressed) { strAppo = "z"; } }
-
+			
 			if (GetKey(olc::Key::K1).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "!"; }
 			else { if (GetKey(olc::Key::K1).bPressed) { strAppo = "1"; } }
 			if (GetKey(olc::Key::K2).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "\""; }
