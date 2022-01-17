@@ -572,7 +572,7 @@ namespace olc
 		NP0, NP1, NP2, NP3, NP4, NP5, NP6, NP7, NP8, NP9,
 		NP_MUL, NP_DIV, NP_ADD, NP_SUB, NP_DECIMAL, PERIOD,
 		EQUALS, COMMA, MINUS,
-		OEM_1, OEM_2, OEM_3, OEM_4, OEM_5, OEM_6, OEM_7, OEM_8,
+		OEM_1, OEM_2, OEM_3, OEM_4, OEM_5, OEM_6, OEM_7, OEM_8, OEM_102,
 		CAPS_LOCK, ENUM_END
 	};
 
@@ -4434,6 +4434,7 @@ namespace olc
 			mapKeys[VK_OEM_6] = Key::OEM_6;			// On US and UK keyboards this is the ']}' key
 			mapKeys[VK_OEM_7] = Key::OEM_7;			// On US keyboard this is the single/double quote key. On UK, this is the single quote/@ symbol key
 			mapKeys[VK_OEM_8] = Key::OEM_8;			// miscellaneous characters. Varies by keyboard
+			mapKeys[VK_OEM_102] = Key::OEM_102;		// Santo C. the '<>' keys on IT keyboard;
 			mapKeys[VK_OEM_PLUS] = Key::EQUALS;		// the '+' key on any keyboard
 			mapKeys[VK_OEM_COMMA] = Key::COMMA;		// the comma key on any keyboard
 			mapKeys[VK_OEM_MINUS] = Key::MINUS;		// the minus key on any keyboard

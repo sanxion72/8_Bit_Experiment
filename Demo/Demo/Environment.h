@@ -26,6 +26,10 @@ private:
 
 	int nLayerBackground = 0;
 	int nLayerBorder = 0;
+	int nLayerStage = 0;
+
+	olc::Sprite* sprDemo = nullptr;
+	olc::Decal* decDemo = nullptr;
 
 	struct charCoord { 
 		int xCoord; 
@@ -334,28 +338,21 @@ private:
 		}
 		else {
 
+			// da {SPACE} a ?
+			if (CharAttrib.chars.CharCode >= 32 && CharAttrib.chars.CharCode <= 63) {
+				ox = charMap[CharAttrib.chars.CharCode + (inverse ? 128 : 0)].xCoord;
+				oy = charMap[CharAttrib.chars.CharCode + (inverse ? 128 : 0)].yCoord;
+			}
+
 			// da @,A,B,C ... a ... ]
 			if (CharAttrib.chars.CharCode >= 64 && CharAttrib.chars.CharCode <= 93) {
 				ox = charMap[CharAttrib.chars.CharCode - 64 + (inverse ? 128 : 0)].xCoord;
 				oy = charMap[CharAttrib.chars.CharCode - 64 + (inverse ? 128 : 0)].yCoord;
 			}
-
-			// carattere freccia su
-			if (CharAttrib.chars.CharCode == 124) {
-				ox = charMap[30 + (inverse ? 128 : 0)].xCoord;
-				oy = charMap[30 + (inverse ? 128 : 0)].yCoord;
-			}
-
-			// carattere freccia sinistra
-			if (CharAttrib.chars.CharCode == 126) {
-				ox = charMap[31 + (inverse ? 128 : 0)].xCoord;
-				oy = charMap[31 + (inverse ? 128 : 0)].yCoord;
-			}
-
-			// da {SPACE} a ?
-			if (CharAttrib.chars.CharCode >= 32 && CharAttrib.chars.CharCode <= 63) {
-				ox = charMap[CharAttrib.chars.CharCode + (inverse ? 128 : 0)].xCoord;
-				oy = charMap[CharAttrib.chars.CharCode + (inverse ? 128 : 0)].yCoord;
+			// carattere Underscore (_)
+			if (CharAttrib.chars.CharCode == 95) {
+				ox = charMap[100 + (inverse ? 128 : 0)].xCoord;
+				oy = charMap[100 + (inverse ? 128 : 0)].yCoord;
 			}
 
 			// da a,b,c,d ... a ... z
@@ -364,11 +361,31 @@ private:
 				oy = charMap[CharAttrib.chars.CharCode + 160 + (inverse ? 128 : 0)].yCoord;
 			}
 
+			// carattere Pound_sign (£)
+			if (CharAttrib.chars.CharCode == 163) {
+				ox = charMap[28 + (inverse ? 128 : 0)].xCoord;
+				oy = charMap[28 + (inverse ? 128 : 0)].yCoord;
+			}
+
+			// carattere freccia su
+			if (CharAttrib.chars.CharCode == 124) {
+				ox = charMap[30 + (inverse ? 128 : 0)].xCoord;
+				oy = charMap[30 + (inverse ? 128 : 0)].yCoord;
+			}
+			
+			// carattere freccia sinistra
+			if (CharAttrib.chars.CharCode == 126) {
+				ox = charMap[31 + (inverse ? 128 : 0)].xCoord;
+				oy = charMap[31 + (inverse ? 128 : 0)].yCoord;
+			}
+
+			/*
 			if (CharAttrib.chars.CharCode == 219) {
 				ox = charMap[CharAttrib.chars.CharCode + 59].xCoord;
 				oy = charMap[CharAttrib.chars.CharCode + 59].yCoord;
 			}
-
+			*/
+			
 			for (uint32_t i = 0; i < 8; i++)
 				for (uint32_t j = 0; j < 8; j++)
 					if (fontSprite->GetPixel(i + ox, j + oy).r > 0) {
@@ -384,8 +401,6 @@ private:
 		pge->SetPixelMode(olc::Pixel::NORMAL);
 
 	}
-
-
 
 	void Init() {
 		
@@ -463,7 +478,7 @@ public:
 
 		memIndex = (y * (ScreenMode ? 80 : 40)) + x;
 
-		for (auto c : sText)
+		for (unsigned char c : sText)
 		{
 			VirtualScreenMap[memIndex].chars.CharForecolor = ScreenBackcolor;
 			VirtualScreenMap[memIndex].chars.CharBackcolor = ScreenBordercolor;
@@ -479,7 +494,7 @@ public:
 		
 		InitVirtualScreenMap();
 
-		pge->Clear(olc::Pixel::MASK);
+		pge->Clear(olc::Pixel::ALPHA);
 
 		nLayerBorder = pge->CreateLayer();
 		pge->SetDrawTarget(nLayerBorder);
@@ -490,13 +505,29 @@ public:
 		pge->EnableLayer(nLayerBorder, true);
 		pge->SetDrawTarget(nullptr);
 
+
+		olc::vf2d sprPos = { 100,100 };
+		sprDemo = new olc::Sprite("..\.\TestPixelEngine\Sprites\SpaceShip.png");
+		decDemo = new olc::Decal(sprDemo);
+
+		nLayerStage = pge->CreateLayer();
+		pge->SetDrawTarget(nLayerStage);
+
+		pge->DrawDecal(sprPos, decDemo);
+		// inserire disegno
+
+		pge->EnableLayer(nLayerStage, true);
+		pge->SetDrawTarget(nullptr);
+
+
+
 		nLayerBackground = pge->CreateLayer();
 		pge->SetDrawTarget(nLayerBackground);
 		pge->FillRect((ScreenMode ? 100 : 50), 20, (ScreenMode ? 640 : 320), 240, olc::Pixel(ScreenBordercolor.R, ScreenBordercolor.G, ScreenBordercolor.B));
 
-		PrintOnScreen(0, 1, "   <*** Commodore 64 Basic V10.0 ***>  ");
-		PrintOnScreen(0, 2, " 16M RAM system 1024K basic bytes free ");
-		PrintOnScreen(0, 4, "Ready.");
+		PrintOnScreen(0, 1, "   *** COMMODORE NGX BASIC V10.0 ***   ");
+		PrintOnScreen(0, 2, " 16M RAM SYSTEM 1024K BASIC BYTES FREE ");
+		PrintOnScreen(0, 4, "READY.");
 
 		//Visualizza_Palette_2();
 		//Visualizza_Palette();
@@ -514,7 +545,6 @@ public:
 		nCol = VirtualScreenMap[nPosition].col;
 	}
 
-
 	void SyncVirtualScreenMap(olc::PixelGameEngine* pge) {
 
 		for (int t = 0; t <= (ScreenMode ? 2399 : 1199); t++) {
@@ -522,7 +552,8 @@ public:
 		}
 
 	}
-	// *** posiziona il cursore nello schermo e gestisce l'effetto lampeggìo
+
+	// *** posiziona il cursore nello schermo e gestisce l'effetto flashing
 	void SetCursor(olc::PixelGameEngine* pge, std::string keyPressed)
 	{
 		if (newScreenMemIndex != screenMemIndex)  {

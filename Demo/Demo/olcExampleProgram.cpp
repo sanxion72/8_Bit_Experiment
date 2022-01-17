@@ -6,7 +6,8 @@ class Example : public olc::PixelGameEngine
 {
 private: 
 	std::string strAppo = "";
-	
+	BOOL Caps_Lock_mode = false;
+
 public:
 
 	template <typename T> std::string tostr(const T& t)
@@ -47,10 +48,10 @@ public:
 		environment.SyncVirtualScreenMap(this);
 
 		// visualizza il fontsprite (potrebbe essere il tilemap sprite)
-		DrawSprite((colMode80 ? 100 : 50), 100, environment.fontSprite);
+		//DrawSprite((colMode80 ? 100 : 50), 100, environment.fontSprite);
 
 		SetDrawTarget(nullptr);
-
+		
 		if (IsFocused()) {
 			if (GetKey(olc::Key::A).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "A"; }
 			else { if (GetKey(olc::Key::A).bPressed) { strAppo = "a"; } }
@@ -129,9 +130,12 @@ public:
 			else { if (GetKey(olc::Key::COMMA).bPressed) { strAppo = ","; } }
 			if (GetKey(olc::Key::PERIOD).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = ":"; }
 			else { if (GetKey(olc::Key::PERIOD).bPressed) { strAppo = "."; } }
-			if (GetKey(olc::Key::MINUS).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = ">"; }
-			else { if (GetKey(olc::Key::MINUS).bPressed) { strAppo = "<"; } }
-
+			if (GetKey(olc::Key::MINUS).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "_"; }
+			else { if (GetKey(olc::Key::MINUS).bPressed) { strAppo = "-"; } }
+			if (GetKey(olc::Key::EQUALS).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "*"; }
+			else { if (GetKey(olc::Key::EQUALS).bPressed) { strAppo = "+"; } }
+			if (GetKey(olc::Key::OEM_102).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = ">"; }
+			else { if (GetKey(olc::Key::OEM_102).bPressed) { strAppo = "<"; } }
 
 			if (GetKey(olc::Key::SPACE).bPressed ) { 
 				strAppo = " ";
@@ -149,9 +153,7 @@ public:
 					environment.PrintOnScreen(environment.cursorCol-1, environment.cursorRow, " ");
 					environment.fTimeChar = 0;
 				}
-
 			}
-
 
 			if (!strAppo.empty()) {
 				if (environment.fTimeChar >= 0.06f) {
@@ -160,6 +162,7 @@ public:
 					environment.fTimeChar = 0;
 				}
 			}
+			
 			if (GetKey(olc::Key::LEFT).bPressed) {
 				strAppo = "LEFT";
 				// sposta il cursore a sinistra
@@ -202,16 +205,28 @@ public:
 				}
 			}
 		}
+		
+		/*
+		if (IsFocused()) {
+			if (GetKey(olc::Key::CAPS_LOCK).bPressed) { 
+				if (Caps_Lock_mode == false) { Caps_Lock_mode = true; }
+				else Caps_Lock_mode = false;
+			}
+			
+			if (GetKey(olc::Key::A).bHeld && Caps_Lock_mode ) { strAppo = "A"; }
+			else { if (GetKey(olc::Key::A).bHeld) { strAppo = "a"; } }
 
+		}
+		*/
 		environment.SetCursor(this,strAppo);
 
 		// timing di azzeramento per lampeggio cursore
 		if (environment.fTimeEl >= 0.6f) environment.fTimeEl = 0.0f;
-
-		DrawString((colMode80 ? 100 : 50), 260, "Tasto : " + strAppo);
-		DrawString((colMode80 ? 340 : 170), 260, "Tempo : " + tostr(environment.fTimeEl));
-		DrawString((colMode80 ? 100 : 50), 268, "Riga : " + tostr(environment.cursorRow) + "     Colonna : " + tostr(environment.cursorCol) + "        " + tostr(environment.screenMemIndex));
-
+		
+		DrawString((colMode80 ? 100 : 50),260, "Tasto : " + strAppo);
+		DrawString((colMode80 ? 340 : 170),260, "Tempo : " + tostr(environment.fTimeEl));
+		DrawString((colMode80 ? 100 : 50),268, "Riga : " + tostr(environment.cursorRow) + "     Colonna : " + tostr(environment.cursorCol) + "        " + tostr(environment.screenMemIndex));
+		
 		return true;
 	}
 
