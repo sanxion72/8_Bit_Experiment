@@ -26,11 +26,7 @@ private:
 
 	int nLayerBackground = 0;
 	int nLayerBorder = 0;
-	int nLayerStage = 0;
-
-	olc::Sprite* sprDemo = nullptr;
-	olc::Decal* decDemo = nullptr;
-
+	
 	struct charCoord { 
 		int xCoord; 
 		int yCoord; 
@@ -398,7 +394,7 @@ private:
 			sx += 8;
 		}
 
-		pge->SetPixelMode(olc::Pixel::NORMAL);
+		//pge->SetPixelMode(olc::Pixel::NORMAL);
 
 	}
 
@@ -410,6 +406,9 @@ private:
 		ScreenBordercolor = Palette[6];
 		
 		LoadCharacterSet(".\\charset.bin", false);
+
+		sprDemo = new olc::Sprite(".\\Sprites\\SpaceShip.png");
+		decDemo = new olc::Decal(sprDemo);
 
 	}
 
@@ -454,6 +453,11 @@ private:
 public:
 	olc::Sprite* fontSprite = nullptr;
 
+	olc::Sprite* sprDemo = nullptr;
+	olc::Decal* decDemo = nullptr;
+	olc::vf2d sprPos = { 100,100 };
+
+
 	int cursorRow = 0;
 	int cursorCol = 0;
 
@@ -494,35 +498,20 @@ public:
 		
 		InitVirtualScreenMap();
 
-		pge->Clear(olc::Pixel::ALPHA);
+		//pge->Clear(olc::Pixel::ALPHA);
 
 		nLayerBorder = pge->CreateLayer();
 		pge->SetDrawTarget(nLayerBorder);
 
 		pge->FillRect(0, 0, (ScreenMode ? 840 : 420), 280, olc::Pixel(ScreenBackcolor.R, ScreenBackcolor.G, ScreenBackcolor.B));
-		pge->FillRect((ScreenMode ? 100 : 50), 20, (ScreenMode ? 640 : 320), 240, olc::Pixel::MASK);
+		pge->FillRect((ScreenMode ? 100 : 50), 20, (ScreenMode ? 640 : 320), 240, olc::Pixel::ALPHA);
 
 		pge->EnableLayer(nLayerBorder, true);
 		pge->SetDrawTarget(nullptr);
 
-
-		olc::vf2d sprPos = { 100,100 };
-		sprDemo = new olc::Sprite("..\.\TestPixelEngine\Sprites\SpaceShip.png");
-		decDemo = new olc::Decal(sprDemo);
-
-		nLayerStage = pge->CreateLayer();
-		pge->SetDrawTarget(nLayerStage);
-
-		pge->DrawDecal(sprPos, decDemo);
-		// inserire disegno
-
-		pge->EnableLayer(nLayerStage, true);
-		pge->SetDrawTarget(nullptr);
-
-
-
 		nLayerBackground = pge->CreateLayer();
 		pge->SetDrawTarget(nLayerBackground);
+
 		pge->FillRect((ScreenMode ? 100 : 50), 20, (ScreenMode ? 640 : 320), 240, olc::Pixel(ScreenBordercolor.R, ScreenBordercolor.G, ScreenBordercolor.B));
 
 		PrintOnScreen(0, 1, "   *** COMMODORE NGX BASIC V10.0 ***   ");
@@ -536,7 +525,7 @@ public:
 		pge->EnableLayer(nLayerBackground, true);
 		pge->SetDrawTarget(nullptr);
 
-		pge->SetPixelMode(olc::Pixel::NORMAL);
+		//pge->SetPixelMode(olc::Pixel::NORMAL);
 
 	}
 	
@@ -546,16 +535,13 @@ public:
 	}
 
 	void SyncVirtualScreenMap(olc::PixelGameEngine* pge) {
-
 		for (int t = 0; t <= (ScreenMode ? 2399 : 1199); t++) {
 			SetCharOnScreen(VirtualScreenMap[t], pge);
 		}
-
 	}
 
 	// *** posiziona il cursore nello schermo e gestisce l'effetto flashing
-	void SetCursor(olc::PixelGameEngine* pge, std::string keyPressed)
-	{
+	void SetCursor(olc::PixelGameEngine* pge, std::string keyPressed) {
 		if (newScreenMemIndex != screenMemIndex)  {
 			// se mi sono spostato col cursore, ripristina il carattere da cui provengo 
 			VirtualScreenMap[screenMemIndex].chars.Inverse = false; // il carattere ' ' spazio
@@ -567,8 +553,7 @@ public:
 
 		screenMemIndex = newScreenMemIndex;
 
-		if ((fTimeEl <= 0.3f) && (keyPressed.empty()))
-		{
+		if ((fTimeEl <= 0.3f) && (keyPressed.empty())) {
 			VirtualScreenMap[screenMemIndex].chars.Inverse = false; // il carattere ' ' spazio
 		}
 	}

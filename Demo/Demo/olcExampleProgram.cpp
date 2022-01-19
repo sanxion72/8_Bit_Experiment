@@ -49,6 +49,7 @@ public:
 
 		// visualizza il fontsprite (potrebbe essere il tilemap sprite)
 		//DrawSprite((colMode80 ? 100 : 50), 100, environment.fontSprite);
+		DrawDecal(environment.sprPos, environment.decDemo);
 
 		SetDrawTarget(nullptr);
 		
