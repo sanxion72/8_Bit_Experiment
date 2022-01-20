@@ -455,7 +455,8 @@ public:
 
 	olc::Sprite* sprDemo = nullptr;
 	olc::Decal* decDemo = nullptr;
-	olc::vf2d sprPos = { 100,100 };
+	//olc::vf2d sprPos = { 100,100 };
+	olc::vf2d sprPos = { float(GetMouseX()), float(GetMouseY()) };
 
 
 	int cursorRow = 0;
@@ -514,7 +515,7 @@ public:
 
 		pge->FillRect((ScreenMode ? 100 : 50), 20, (ScreenMode ? 640 : 320), 240, olc::Pixel(ScreenBordercolor.R, ScreenBordercolor.G, ScreenBordercolor.B));
 
-		PrintOnScreen(0, 1, "   *** COMMODORE NGX BASIC V10.0 ***   ");
+		PrintOnScreen(0, 1, "  *** COMMODORE NGNX  BASIC V10.0 ***  ");
 		PrintOnScreen(0, 2, " 16M RAM SYSTEM 1024K BASIC BYTES FREE ");
 		PrintOnScreen(0, 4, "READY.");
 
