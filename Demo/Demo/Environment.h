@@ -26,7 +26,7 @@ private:
 
 	int nLayerBackground = 0;
 	int nLayerBorder = 0;
-
+	
 	struct charCoord { 
 		int xCoord; 
 		int yCoord; 
@@ -39,7 +39,7 @@ private:
 		int				CharCode = 0;					// il codice del carattere (ASCII) all'interno della posizione nel chars fontsheet
 		Color			CharForecolor;					// il colore del carattere 
 		Color			CharBackcolor;					// il colore dello sfondo del carattere
-		BOOL			Inverse = false;				// se il carattere è inverso (in negativo)
+		BOOL			Inverse = false;				// se il carattere ï¿½ inverso (in negativo)
 		unsigned char	Alpha_BackgroundColor = 255;	// canale alfa dello sfondo (255 pieno)
 		unsigned char	Alpha_CharColor = 255;			// canale alfa del carattere (255 pieno)
 	};
@@ -50,7 +50,7 @@ private:
 		CharAttrib chars;
 	};
 
-	//array di 2400 elementi che mappa in-memory lo schermo (se modalità 40 colonne, valgono i primi 1200 elementi, altrimenti tutti i 2400 elementi;  Per 30 righe con carattere 8x8)
+	//array di 2400 elementi che mappa in-memory lo schermo (se modalitï¿½ 40 colonne, valgono i primi 1200 elementi, altrimenti tutti i 2400 elementi;  Per 30 righe con carattere 8x8)
 	CharCell VirtualScreenMap[2400];
 	
 	template< typename T >
@@ -334,10 +334,33 @@ private:
 		}
 		else {
 
+			// da {SPACE} a ?
+			if (CharAttrib.chars.CharCode >= 32 && CharAttrib.chars.CharCode <= 63) {
+				ox = charMap[CharAttrib.chars.CharCode + (inverse ? 128 : 0)].xCoord;
+				oy = charMap[CharAttrib.chars.CharCode + (inverse ? 128 : 0)].yCoord;
+			}
+
 			// da @,A,B,C ... a ... ]
 			if (CharAttrib.chars.CharCode >= 64 && CharAttrib.chars.CharCode <= 93) {
 				ox = charMap[CharAttrib.chars.CharCode - 64 + (inverse ? 128 : 0)].xCoord;
 				oy = charMap[CharAttrib.chars.CharCode - 64 + (inverse ? 128 : 0)].yCoord;
+			}
+			// carattere Underscore (_)
+			if (CharAttrib.chars.CharCode == 95) {
+				ox = charMap[100 + (inverse ? 128 : 0)].xCoord;
+				oy = charMap[100 + (inverse ? 128 : 0)].yCoord;
+			}
+
+			// da a,b,c,d ... a ... z
+			if (CharAttrib.chars.CharCode >= 97 && CharAttrib.chars.CharCode <= 122) {
+				ox = charMap[CharAttrib.chars.CharCode + 160 + (inverse ? 128 : 0)].xCoord;
+				oy = charMap[CharAttrib.chars.CharCode + 160 + (inverse ? 128 : 0)].yCoord;
+			}
+
+			// carattere Pound_sign (ï¿½)
+			if (CharAttrib.chars.CharCode == 163) {
+				ox = charMap[28 + (inverse ? 128 : 0)].xCoord;
+				oy = charMap[28 + (inverse ? 128 : 0)].yCoord;
 			}
 			
 			// carattere underscore
@@ -351,7 +374,7 @@ private:
 				ox = charMap[30 + (inverse ? 128 : 0)].xCoord;
 				oy = charMap[30 + (inverse ? 128 : 0)].yCoord;
 			}
-
+			
 			// carattere freccia sinistra
 			if (CharAttrib.chars.CharCode == 126) {
 				ox = charMap[28 + (inverse ? 128 : 0)].xCoord;
@@ -367,23 +390,13 @@ private:
 				oy = charMap[28 + (inverse ? 128 : 0)].yCoord;
 			}
 
-			// da {SPACE} a ?
-			if (CharAttrib.chars.CharCode >= 32 && CharAttrib.chars.CharCode <= 63) {
-				ox = charMap[CharAttrib.chars.CharCode + (inverse ? 128 : 0)].xCoord;
-				oy = charMap[CharAttrib.chars.CharCode + (inverse ? 128 : 0)].yCoord;
-			}
-
-			// da a,b,c,d ... a ... z
-			if (CharAttrib.chars.CharCode >= 97 && CharAttrib.chars.CharCode <= 122) {
-				ox = charMap[CharAttrib.chars.CharCode + 160 + (inverse ? 128 : 0)].xCoord;
-				oy = charMap[CharAttrib.chars.CharCode + 160 + (inverse ? 128 : 0)].yCoord;
-			}
-
+			/*
 			if (CharAttrib.chars.CharCode == 219) {
 				ox = charMap[CharAttrib.chars.CharCode + 59].xCoord;
 				oy = charMap[CharAttrib.chars.CharCode + 59].yCoord;
 			}
-
+			*/
+			
 			for (uint32_t i = 0; i < 8; i++)
 				for (uint32_t j = 0; j < 8; j++)
 					if (fontSprite->GetPixel(i + ox, j + oy).r > 0) {
@@ -396,11 +409,9 @@ private:
 			sx += 8;
 		}
 
-		pge->SetPixelMode(olc::Pixel::NORMAL);
+		//pge->SetPixelMode(olc::Pixel::NORMAL);
 
 	}
-
-
 
 	void Init() {
 		
@@ -409,6 +420,9 @@ private:
 		ScreenBackcolor = Palette[14]; ScreenBordercolor = Palette[6];
 		
 		LoadCharacterSet(".\\charset.bin", false);
+
+		sprDemo = new olc::Sprite(".\\Sprites\\SpaceShip.png");
+		decDemo = new olc::Decal(sprDemo);
 
 	}
 
@@ -460,6 +474,12 @@ private:
 public:
 	olc::Sprite* fontSprite = nullptr;
 
+	olc::Sprite* sprDemo = nullptr;
+	olc::Decal* decDemo = nullptr;
+	//olc::vf2d sprPos = { 100,100 };
+	olc::vf2d sprPos = { float(GetMouseX()), float(GetMouseY()) };
+
+
 	int cursorRow = 0;
 	int cursorCol = 0;
 
@@ -484,7 +504,7 @@ public:
 
 		memIndex = (y * (ScreenMode ? 80 : 40)) + x;
 
-		for (unsigned char c : sText)
+		for (auto c : sText)
 		{
 			VirtualScreenMap[memIndex].chars.CharForecolor = ScreenBackcolor;
 			VirtualScreenMap[memIndex].chars.CharBackcolor = ScreenBordercolor;
@@ -500,19 +520,20 @@ public:
 		
 		InitVirtualScreenMap();
 
-		pge->Clear(olc::Pixel::MASK);
+		//pge->Clear(olc::Pixel::ALPHA);
 
 		nLayerBorder = pge->CreateLayer();
 		pge->SetDrawTarget(nLayerBorder);
 
 		pge->FillRect(0, 0, (ScreenMode ? 840 : 420), 280, olc::Pixel(ScreenBackcolor.R, ScreenBackcolor.G, ScreenBackcolor.B));
-		pge->FillRect((ScreenMode ? 100 : 50), 20, (ScreenMode ? 640 : 320), 240, olc::Pixel::MASK);
+		pge->FillRect((ScreenMode ? 100 : 50), 20, (ScreenMode ? 640 : 320), 240, olc::Pixel::ALPHA);
 
 		pge->EnableLayer(nLayerBorder, true);
 		pge->SetDrawTarget(nullptr);
 
 		nLayerBackground = pge->CreateLayer();
 		pge->SetDrawTarget(nLayerBackground);
+
 		pge->FillRect((ScreenMode ? 100 : 50), 20, (ScreenMode ? 640 : 320), 240, olc::Pixel(ScreenBordercolor.R, ScreenBordercolor.G, ScreenBordercolor.B));
 
 		PrintOnScreen(0, 1, "    *** Commodore 64 Basic V10.0 ***   ");
@@ -530,7 +551,7 @@ public:
 		
 
 		pge->SetPixelMode(olc::Pixel::NORMAL);
-		
+
 	}
 	
 	void GetRowColFromPosition(int& nRow, int& nCol, int nPosition) {
@@ -538,18 +559,15 @@ public:
 		nCol = VirtualScreenMap[nPosition].col;
 	}
 
-
 	void SyncVirtualScreenMap(olc::PixelGameEngine* pge) {
-
 		for (int t = 0; t <= (ScreenMode ? 2399 : 1199); t++) {
 			SetCharOnScreen(VirtualScreenMap[t], pge);
 			
 		}
-
 	}
-	// *** posiziona il cursore nello schermo e gestisce l'effetto lampeggìo
-	void SetCursor(olc::PixelGameEngine* pge, std::string keyPressed)
-	{
+
+	// *** posiziona il cursore nello schermo e gestisce l'effetto flashing
+	void SetCursor(olc::PixelGameEngine* pge, std::string keyPressed) {
 		if (newScreenMemIndex != screenMemIndex)  {
 			// se mi sono spostato col cursore, ripristina il carattere da cui provengo 
 			VirtualScreenMap[screenMemIndex].chars.Inverse = false; // il carattere ' ' spazio
@@ -561,8 +579,7 @@ public:
 
 		screenMemIndex = newScreenMemIndex;
 
-		if ((fTimeEl <= 0.3f) && (keyPressed.empty()))
-		{
+		if ((fTimeEl <= 0.3f) && (keyPressed.empty())) {
 			VirtualScreenMap[screenMemIndex].chars.Inverse = false; // il carattere ' ' spazio
 		}
 	}
