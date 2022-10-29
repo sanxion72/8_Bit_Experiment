@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31911.196
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EditEx", "EditEx\EditEx.vcxproj", "{95DD145D-1C6F-4D63-9420-D3CD8D185E83}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{95DD145D-1C6F-4D63-9420-D3CD8D185E83}.Debug|Win32.ActiveCfg = Debug|Win32
+		{95DD145D-1C6F-4D63-9420-D3CD8D185E83}.Debug|Win32.Build.0 = Debug|Win32
+		{95DD145D-1C6F-4D63-9420-D3CD8D185E83}.Release|Win32.ActiveCfg = Release|Win32
+		{95DD145D-1C6F-4D63-9420-D3CD8D185E83}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F289622F-C4DF-4F07-AE56-A5BAE1D462B8}
+	EndGlobalSection
+EndGlobal
