@@ -48,7 +48,7 @@ public:
 		environment.SyncVirtualScreenMap(this);
 
 		// visualizza il fontsprite (potrebbe essere il tilemap sprite)
-		DrawSprite((colMode80 ? 100 : 50), 100, environment.fontSprite);
+		//DrawSprite((colMode80 ? 100 : 50), 100, environment.fontSprite);
 
 		SetDrawTarget(nullptr);
 		

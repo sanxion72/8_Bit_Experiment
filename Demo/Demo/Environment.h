@@ -477,7 +477,7 @@ public:
 	olc::Sprite* sprDemo = nullptr;
 	olc::Decal* decDemo = nullptr;
 	//olc::vf2d sprPos = { 100,100 };
-	olc::vf2d sprPos = { float(GetMouseX()), float(GetMouseY()) };
+	//olc::vf2d sprPos = { float(GetMouseX()), float(GetMouseY()) };
 
 
 	int cursorRow = 0;
