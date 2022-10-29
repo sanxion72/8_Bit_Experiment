@@ -46,9 +46,6 @@ public:
 
 		environment.SyncVirtualScreenMap(this);
 
-		// visualizza il fontsprite (potrebbe essere il tilemap sprite)
-		DrawSprite((colMode80 ? 100 : 50), 100, environment.fontSprite);
-
 		SetDrawTarget(nullptr);
 
 		if (IsFocused()) {
@@ -115,7 +112,7 @@ public:
 			else { if (GetKey(olc::Key::K4).bPressed) { strAppo = "4"; } }
 			if (GetKey(olc::Key::K5).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "%"; }
 			else { if (GetKey(olc::Key::K5).bPressed) { strAppo = "5"; } }
-			if (GetKey(olc::Key::K6).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "&"; }
+			if (GetKey(olc::Key::K6).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "£"; }
 			else { if (GetKey(olc::Key::K6).bPressed) { strAppo = "6"; } }
 			if (GetKey(olc::Key::K7).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "/"; }
 			else { if (GetKey(olc::Key::K7).bPressed) { strAppo = "7"; } }
@@ -129,9 +126,18 @@ public:
 			else { if (GetKey(olc::Key::COMMA).bPressed) { strAppo = ","; } }
 			if (GetKey(olc::Key::PERIOD).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = ":"; }
 			else { if (GetKey(olc::Key::PERIOD).bPressed) { strAppo = "."; } }
-			if (GetKey(olc::Key::MINUS).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = ">"; }
-			else { if (GetKey(olc::Key::MINUS).bPressed) { strAppo = "<"; } }
 
+			if (GetKey(olc::Key::OEM_102).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = ">"; }
+			else { if (GetKey(olc::Key::OEM_102).bPressed) { strAppo = "<"; } }
+
+			if (GetKey(olc::Key::OEM_4).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "?"; }
+			else { if (GetKey(olc::Key::OEM_4).bPressed) { strAppo = "'"; } }
+
+			if (GetKey(olc::Key::MINUS).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "_"; }
+			else { if (GetKey(olc::Key::MINUS).bPressed) { strAppo = "-"; } }
+
+			if (GetKey(olc::Key::EQUALS).bPressed && GetKey(olc::Key::SHIFT).bHeld) { strAppo = "*"; }
+			else { if (GetKey(olc::Key::EQUALS).bPressed) { strAppo = "+"; } }
 
 			if (GetKey(olc::Key::SPACE).bPressed ) { 
 				strAppo = " ";
@@ -223,7 +229,7 @@ int main()
 {
 	Example demo;
 	
-	demo.colMode80 = false;
+	demo.colMode80 = true;
 
 	if (demo.Construct((demo.colMode80 ? 840 : 420), 280, (demo.colMode80 ? 1 : 2), 2))
 		demo.Start();

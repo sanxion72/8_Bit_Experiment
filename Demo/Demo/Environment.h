@@ -57,7 +57,7 @@ private:
 	std::string int_to_hex(T i)
 	{
 		std::stringstream stream;
-		stream << std::setfill('0') << std::setw(sizeof(T) * 2) << std::hex << i;
+		stream << std::setfill('0') << std::setw(sizeof(T) << 2) << std::hex << i;
 		return stream.str();
 	}
 
@@ -339,6 +339,12 @@ private:
 				ox = charMap[CharAttrib.chars.CharCode - 64 + (inverse ? 128 : 0)].xCoord;
 				oy = charMap[CharAttrib.chars.CharCode - 64 + (inverse ? 128 : 0)].yCoord;
 			}
+			
+			// carattere underscore
+			if (CharAttrib.chars.CharCode == 95) {
+				ox = charMap[100 + (inverse ? 128 : 0)].xCoord;
+				oy = charMap[100 + (inverse ? 128 : 0)].yCoord;
+			}
 
 			// carattere freccia su
 			if (CharAttrib.chars.CharCode == 124) {
@@ -348,8 +354,17 @@ private:
 
 			// carattere freccia sinistra
 			if (CharAttrib.chars.CharCode == 126) {
+				ox = charMap[28 + (inverse ? 128 : 0)].xCoord;
+				oy = charMap[28 + (inverse ? 128 : 0)].yCoord;
+			}
+
+			if (CharAttrib.chars.CharCode == 156) {
 				ox = charMap[31 + (inverse ? 128 : 0)].xCoord;
 				oy = charMap[31 + (inverse ? 128 : 0)].yCoord;
+			}
+			if (CharAttrib.chars.CharCode == 163) {
+				ox = charMap[28 + (inverse ? 128 : 0)].xCoord;
+				oy = charMap[28 + (inverse ? 128 : 0)].yCoord;
 			}
 
 			// da {SPACE} a ?
@@ -391,10 +406,16 @@ private:
 		
 		InitPalette(".\\palette.hex");
 
-		ScreenBackcolor = Palette[14];
-		ScreenBordercolor = Palette[6];
+		ScreenBackcolor = Palette[14]; ScreenBordercolor = Palette[6];
 		
 		LoadCharacterSet(".\\charset.bin", false);
+
+	}
+
+	void Visualizza_Caratteri()
+	{
+		// visualizza il fontsprite (potrebbe essere il tilemap sprite)
+		//DrawSprite((ScreenMode ? 100 : 50), 100, fontSprite);
 
 	}
 
@@ -463,7 +484,7 @@ public:
 
 		memIndex = (y * (ScreenMode ? 80 : 40)) + x;
 
-		for (auto c : sText)
+		for (unsigned char c : sText)
 		{
 			VirtualScreenMap[memIndex].chars.CharForecolor = ScreenBackcolor;
 			VirtualScreenMap[memIndex].chars.CharBackcolor = ScreenBordercolor;
@@ -494,19 +515,22 @@ public:
 		pge->SetDrawTarget(nLayerBackground);
 		pge->FillRect((ScreenMode ? 100 : 50), 20, (ScreenMode ? 640 : 320), 240, olc::Pixel(ScreenBordercolor.R, ScreenBordercolor.G, ScreenBordercolor.B));
 
-		PrintOnScreen(0, 1, "   <*** Commodore 64 Basic V10.0 ***>  ");
+		PrintOnScreen(0, 1, "    *** Commodore 64 Basic V10.0 ***   ");
 		PrintOnScreen(0, 2, " 16M RAM system 1024K basic bytes free ");
 		PrintOnScreen(0, 4, "Ready.");
 
-		//Visualizza_Palette_2();
+		Visualizza_Palette_2();
 		//Visualizza_Palette();
 		//Visualizza_Caratteri();
+		
 
 		pge->EnableLayer(nLayerBackground, true);
 		pge->SetDrawTarget(nullptr);
+		
+		
 
 		pge->SetPixelMode(olc::Pixel::NORMAL);
-
+		
 	}
 	
 	void GetRowColFromPosition(int& nRow, int& nCol, int nPosition) {
@@ -519,6 +543,7 @@ public:
 
 		for (int t = 0; t <= (ScreenMode ? 2399 : 1199); t++) {
 			SetCharOnScreen(VirtualScreenMap[t], pge);
+			
 		}
 
 	}
