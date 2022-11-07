@@ -7,33 +7,41 @@
 #include <iomanip>  
 
 #include "olcPixelGameEngine.h"
+#include "PCX_Engine.h"
 
 class Environment
 {
 private:
+	enum scrMode { _MODE40_ = 1, _MODE80_ = 2, _MODEG320_ = 10, _MODEG640_ = 11 };
+
+	BOOL colMode80;
+
 	std::string RGB[256];
 
-	struct Color {
+	PCX_Engine PcxLoader;
+	PCX_Engine::sPcx_picture image;
+
+	typedef struct Color_typ {
 		unsigned char R;	// RED
 		unsigned char G;	// GREEN
 		unsigned char B;	// BLUE
 		unsigned char A;	// ALPHA
-	};
+	} Color, *Color_ptr;
 
-	struct Color Palette[256];
-	
-	Color ScreenBackcolor; Color ScreenBordercolor;		// colori iniziali bordo e sfondo
+	Color Palette[256]; Color ScreenBackcolor; Color ScreenBordercolor;		// colori iniziali bordo e sfondo
 
 	int nLayerBackground = 0;
 	int nLayerBorder = 0;
 	
-	struct charCoord { 
+	typedef struct charCoord_typ { 
 		int xCoord; 
 		int yCoord; 
 		//int CharCodeAscii = 0;							// codice ASCII (PC) associato al carattere 
-	};
+	} charCoord, *CharCoord_ptr;
 
-	struct charCoord charMap[512];						// array contenente le coordinate di tutti i singoli 512 caratteri all'interno del "fontsprite" caricato
+	charCoord charMap[512];						// array contenente le coordinate di tutti i singoli 512 caratteri all'interno del "fontsprite" caricato
+
+	unsigned char BufferVideo[307200];			// buffer video (singolo buffer=>640X480 o doppio buffer=>320X240) : ogni elemento rappresenta un pixel il cui valore da 0 a 255 si riferisce all'elemento dell'array Palette
 
 	struct CharAttrib {
 		int				CharCode = 0;					// il codice del carattere (ASCII) all'interno della posizione nel chars fontsheet
@@ -60,6 +68,9 @@ private:
 		stream << std::setfill('0') << std::setw(sizeof(T) << 2) << std::hex << i;
 		return stream.str();
 	}
+
+	byte _scrMode;
+	byte _factMult;
 
 	/*
 	// Commodore Palette
@@ -143,7 +154,7 @@ private:
 	RGB[250] = "040003FF";		RGB[251] = "060004FF";		RGB[252] = "080006FF";		RGB[253] = "0A0008FF";
 	RGB[254] = "0C0009FF";		RGB[255] = "0F000BFF";
 	*/
-	
+
 	// Inizializza la palette
 	void InitPalette(std::string paletteFileName) {
 
@@ -189,23 +200,6 @@ private:
 		}
 
 	}
-
-	/*
-	void GeneraPalette() {
-		std::stringstream stream;
-
-		std::ofstream fout(".\defpal.hex");
-		if (!fout) {
-			std::cout << "Cannot open file for output.\n";
-			
-		}
-		for (int index = 0; index <= 255; index++) {
-			fout << int_to_hex<int>(Palette[index].R) << int_to_hex<int>(Palette[index].G) << int_to_hex<int>(Palette[index].B) << std::endl;
-		}
-
-		fout.close();
-	}
-	*/
 
 	void LoadCharacterSet(std::string charFileName, BOOL bSkip = true) {
 
@@ -255,35 +249,21 @@ private:
 
 			Count++;
 		}
-		
-		/*
-		// Associa codici ASCII ai singoli elementi dell'array charMap
-		for (int cnt=0; cnt <= 29; cnt++) {
-			charMap[cnt].CharCodeAscii = 64 + cnt; 
-		}
-		
-		charMap[30].CharCodeAscii = 124; //carattere freccia su
-		charMap[31].CharCodeAscii = 126; //carattere freccia sinistra
-
-		for (int cnt = 32; cnt <= 63; cnt++) {
-			charMap[cnt].CharCodeAscii = cnt;
-		}
-		*/
-
+	
 	}
 
 	// inizializza la virtualscreen map con il carattere ' ' spazio
-	void InitVirtualScreenMap()
+	void InitVirtualScreenFontMap()
 	{
 		int offsetColonna = 0; int offsetRiga = 0; int index = 0;
 
 		for (int riga = 0; riga <= 29; riga++)
 		{
-			for (int colonna = 0; colonna <= (ScreenMode ? 79 : 39); colonna++)
+			for (int colonna = 0; colonna <= (colMode80 ? 79 : 39); colonna++)
 			{
 				VirtualScreenMap[index].row = riga;
 				VirtualScreenMap[index].col = colonna;
-				VirtualScreenMap[index].xCoord = (ScreenMode ? 100 : 50) + offsetColonna;
+				VirtualScreenMap[index].xCoord = (50 * _factMult) + offsetColonna;
 				VirtualScreenMap[index].yCoord = 20 + offsetRiga;
 				VirtualScreenMap[index].chars.CharCode = 32; // il codice del carattere ' ' (spazio)
 				VirtualScreenMap[index].chars.CharForecolor = ScreenBackcolor;
@@ -415,21 +395,14 @@ private:
 
 	void Init() {
 		
-		InitPalette(".\\palette.hex");
+		// Initialize default palette and default character set
 
-		ScreenBackcolor = Palette[14]; ScreenBordercolor = Palette[6];
-		
+		InitPalette(".\\palette.hex");
 		LoadCharacterSet(".\\charset.bin", false);
 
-		sprDemo = new olc::Sprite(".\\Sprites\\SpaceShip.png");
-		decDemo = new olc::Decal(sprDemo);
-
-	}
-
-	void Visualizza_Caratteri()
-	{
-		// visualizza il fontsprite (potrebbe essere il tilemap sprite)
-		//DrawSprite((ScreenMode ? 100 : 50), 100, fontSprite);
+		//PcxLoader.PCX_load(".\\rambo.pcx", &image);
+		//memcpy(Palette, image.palette, 256 * sizeof(Color_typ));
+		//ScreenBackcolor = Palette[14]; ScreenBordercolor = Palette[6];
 
 	}
 
@@ -447,7 +420,7 @@ private:
 	{
 		// visualizza la palette su schermo come carattere spazio inverse con il colore uguale foregroud e background
 		int nCol = 0; int nRow = 0;
-		nRow = (ScreenMode ? 80 : 40) * 6;
+		nRow = (40 * _factMult) * 6;
 
 		for (int nColor = 0; nColor <= 255; nColor++) {
 			VirtualScreenMap[nCol + nRow].chars.CharCode = 32; // il carattere ' ' spazio
@@ -455,30 +428,13 @@ private:
 			VirtualScreenMap[nCol + nRow].chars.CharBackcolor = Palette[nColor];
 			if (nCol++ >= 15) {
 				nCol = 0;
-				nRow = nRow + (ScreenMode ? 80 : 40);
+				nRow = nRow + (40 * _factMult);
 			}
 		}
 	}
-	/*
-	void Visualizza_Caratteri()
-	{
-		// visualizza i primi 128 caratteri
-		for (int nChar = 0; nChar <= 63; nChar++) {
-			VirtualScreenMap[nChar].chars.CharCode = charMap[nChar].CharCodeAscii; // il codice del carattere 
-			VirtualScreenMap[nChar].chars.CharForecolor = ScreenBackcolor;
-			VirtualScreenMap[nChar].chars.CharBackcolor = ScreenBordercolor;
-		}
-	}
-	*/
-
+	
 public:
 	olc::Sprite* fontSprite = nullptr;
-
-	olc::Sprite* sprDemo = nullptr;
-	olc::Decal* decDemo = nullptr;
-	//olc::vf2d sprPos = { 100,100 };
-	//olc::vf2d sprPos = { float(GetMouseX()), float(GetMouseY()) };
-
 
 	int cursorRow = 0;
 	int cursorCol = 0;
@@ -491,18 +447,21 @@ public:
 	// contatore del tempo trascorso per la scrittura del carattere su schermo
 	float fTimeChar = 0.0f;
 
-
 	Environment() {
-		Init();
+		
 	}
 
-	BOOL ScreenMode;
+	void screenMode(const byte& mode) {
+		_scrMode = mode;
+		if ((_scrMode == _MODE40_) || (_scrMode == _MODEG320_)) { colMode80 = false; _factMult = 1; }
+		if ((_scrMode == _MODE80_) || (_scrMode == _MODEG640_)) { colMode80 = true; _factMult = 2; }
+	}
 
 	void PrintOnScreen(int32_t x, int32_t y, const std::string& sText, BOOL inverse = false, BYTE alpha_color = 255, BYTE alpha_background = 255)
 	{
 		int memIndex;
 
-		memIndex = (y * (ScreenMode ? 80 : 40)) + x;
+		memIndex = (y * (40 * _factMult)) + x;
 
 		for (auto c : sText)
 		{
@@ -516,40 +475,70 @@ public:
 		}
 	}
 
+	void PCX_LoadOnScreen(olc::PixelGameEngine* pge, PCX_Engine::sPcx_picture image) {
+		uint32_t index = 0;
+		Color PixelColor;
+		
+		for (short coordY = 0; coordY < image.header.height; coordY++)
+		{
+			for (short coordX = 0; coordX < image.header.width; coordX++)
+			{
+				PixelColor = Palette[image.buffer[index]];
+
+				pge->Draw(coordX + 50, coordY + 20, olc::Pixel(PixelColor.R, PixelColor.G, PixelColor.B));
+				index++;
+			}
+			index++;
+		}
+	}
+
+
 	void InitScreen(olc::PixelGameEngine* pge) {
 		
-		InitVirtualScreenMap();
+		Init(); // Initialize default palette and default character set
+
+		PcxLoader.PCX_load(".\\rambo.pcx", &image); // Carica immagine 
+		memcpy(Palette, image.palette, 256 * sizeof(Color_typ)); // sovrascrive la palette di default
+		ScreenBackcolor = Palette[14]; ScreenBordercolor = Palette[6]; // setta colore bordo e sfondo
+		
+		PCX_LoadOnScreen(pge, image);
+
+		InitVirtualScreenFontMap();
 
 		//pge->Clear(olc::Pixel::ALPHA);
 
 		nLayerBorder = pge->CreateLayer();
+		
 		pge->SetDrawTarget(nLayerBorder);
-
-		pge->FillRect(0, 0, (ScreenMode ? 840 : 420), 280, olc::Pixel(ScreenBackcolor.R, ScreenBackcolor.G, ScreenBackcolor.B));
-		pge->FillRect((ScreenMode ? 100 : 50), 20, (ScreenMode ? 640 : 320), 240, olc::Pixel::ALPHA);
+		
+		pge->FillRect(0, 0, (420 * _factMult), 280, olc::Pixel(ScreenBackcolor.R, ScreenBackcolor.G, ScreenBackcolor.B));
+		pge->FillRect((50 * _factMult), 20, (320 * _factMult), 240, olc::Pixel::ALPHA);
 
 		pge->EnableLayer(nLayerBorder, true);
 		pge->SetDrawTarget(nullptr);
 
 		nLayerBackground = pge->CreateLayer();
+
 		pge->SetDrawTarget(nLayerBackground);
 
-		pge->FillRect((ScreenMode ? 100 : 50), 20, (ScreenMode ? 640 : 320), 240, olc::Pixel(ScreenBordercolor.R, ScreenBordercolor.G, ScreenBordercolor.B));
-
-		PrintOnScreen(0, 1, "    *** Commodore 64 Basic V10.0 ***   ");
-		PrintOnScreen(0, 2, " 16M RAM system 1024K basic bytes free ");
-		PrintOnScreen(0, 4, "Ready.");
-
-		Visualizza_Palette_2();
-		//Visualizza_Palette();
-		//Visualizza_Caratteri();
+		pge->FillRect((50 * _factMult), 20, (320 * _factMult), 240, olc::Pixel(ScreenBordercolor.R, ScreenBordercolor.G, ScreenBordercolor.B));
 		
+		if ((_scrMode == _MODE40_) || (_scrMode == _MODE80_)) {
+			PrintOnScreen(0, 1, "    *** Commodore 64 Basic V10.0 ***   ");
+			PrintOnScreen(0, 2, " 16M RAM system 1024K basic bytes free ");
+			PrintOnScreen(0, 4, "Ready.");
+
+			//Visualizza_Palette_2();
+			//Visualizza_Palette();
+	
+		}
+
+		// prova
+		PCX_LoadOnScreen(pge,image);
 
 		pge->EnableLayer(nLayerBackground, true);
 		pge->SetDrawTarget(nullptr);
 		
-		
-
 		pge->SetPixelMode(olc::Pixel::NORMAL);
 
 	}
@@ -560,7 +549,7 @@ public:
 	}
 
 	void SyncVirtualScreenMap(olc::PixelGameEngine* pge) {
-		for (int t = 0; t <= (ScreenMode ? 2399 : 1199); t++) {
+		for (int t = 0; t <= (colMode80 ? 2399 : 1199 ); t++) {
 			SetCharOnScreen(VirtualScreenMap[t], pge);
 			
 		}
